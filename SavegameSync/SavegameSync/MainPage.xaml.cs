@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -29,10 +30,14 @@ namespace SavegameSync
         public MainPage()
         {
             this.InitializeComponent();
-            loginToOneDrive();
         }
 
-        private async void loginToOneDrive()
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            await LoginToOneDrive();
+        }
+
+        private async Task LoginToOneDrive()
         {
             // I am not sure what best practices are regarding saving OAuth client IDs in code,
             // so for now, I will leave the client ID out of the code that appears online
@@ -46,7 +51,7 @@ namespace SavegameSync
                 /*CredentialCache*/ null,
                 new CredentialVault(clientId));
             await msaAuthenticationProvider.RestoreMostRecentFromCacheOrAuthenticateUserAsync();
-            client = new OneDriveClient("https://api.onedrive.com/v2.0", msaAuthenticationProvider);
+            client = new OneDriveClient("https://api.onedrive.com/v1.0", msaAuthenticationProvider);
             loginStatusTextBlock.Text = "Logged in";
         }
     }
