@@ -39,8 +39,7 @@ namespace SavegameSyncWPF
         {
             // I am not sure what best practices are regarding saving OAuth client IDs in code,
             // so for now, I will leave the client ID out of the code that appears online
-            string clientId = "4285ae3b-e18a-496a-9a72-d82cc3a8375d";
-            //string redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
+            string clientId = "xxx";
             string redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
             string[] scopes = { "onedrive.appfolder" };
             var msaAuthenticationProvider = new MsaAuthenticationProvider(
