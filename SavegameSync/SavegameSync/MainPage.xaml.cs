@@ -2,12 +2,15 @@
 using Microsoft.OneDrive.Sdk.Authentication;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using System.Xml;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -39,9 +42,21 @@ namespace SavegameSync
 
         private async Task LoginToOneDrive()
         {
-            // I am not sure what best practices are regarding saving OAuth client IDs in code,
-            // so for now, I will leave the client ID out of the code that appears online
-            string clientId = "xxx";
+            string clientId = null;
+            using (FileStream configFileStream = System.IO.File.OpenRead("Config.xml"))
+            {
+                XmlDocument configFileDoc = new XmlDocument();
+                configFileDoc.Load(configFileStream);
+                XmlNodeList nodes = configFileDoc.DocumentElement.ChildNodes;
+                foreach (XmlNode node in nodes)
+                {
+                    if (node.Name == "clientId")
+                    {
+                        clientId = node.InnerText;
+                    }
+                }
+            }
+
             string redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
             string[] scopes = { "onedrive.appfolder" };
             var msaAuthenticationProvider = new MsaAuthenticationProvider(
