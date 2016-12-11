@@ -37,9 +37,7 @@ namespace SavegameSyncWPF
 
         private async Task LoginToOneDrive()
         {
-            // I am not sure what best practices are regarding saving OAuth client IDs in code,
-            // so for now, I will leave the client ID out of the code that appears online
-            string clientId = "xxx";
+            string clientId = System.Configuration.ConfigurationManager.AppSettings["clientId"];
             string redirectUrl = "urn:ietf:wg:oauth:2.0:oob";
             string[] scopes = { "onedrive.appfolder" };
             var msaAuthenticationProvider = new MsaAuthenticationProvider(
