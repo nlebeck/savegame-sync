@@ -1,6 +1,12 @@
 # savegame-sync
 A utility to synchronize savegame files for GOG games with OneDrive.
 
+## On hold
+
+This project is on hold until I find a solution for bugs associated with using Streams with the OneDrive SDK (described in this issue: https://github.com/OneDrive/onedrive-sdk-csharp/issues/204).
+
+## Goal
+
 The goal of this project is to make a lightweight application that allows users to easily synchronize their savegame files for GOG games. Right now, GOG does not provide a cloud save utility like Steam Cloud, so users have to manually copy savegame files between computers. This application will maintain cloud saves in a user's OneDrive account and provide a simple interface for synchronizing those save files with local files.
 
 ## Plan
