@@ -29,7 +29,8 @@ namespace SavegameSyncWPF
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static string applicationName = "Savegame Sync";
+        private const string ApplicationName = "Savegame Sync";
+        private const string SavegameListFileName = "savegame-list.txt";
 
         private DriveService service;
 
@@ -138,7 +139,7 @@ namespace SavegameSyncWPF
             DriveService service = new DriveService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = applicationName,
+                ApplicationName = ApplicationName,
             });
 
             return service;
@@ -146,19 +147,19 @@ namespace SavegameSyncWPF
 
         private async Task CheckSavegameListFile()
         {
-            List<string> fileIds = await SearchFileByNameAsync("savegame-list.txt");
+            List<string> fileIds = await SearchFileByNameAsync(SavegameListFileName);
             if (fileIds.Count == 0)
             {
-                string id = await CreateFileAsync("savegame-list.txt");
-                Debug.WriteLine("Created new file with Id " + id);
+                string id = await CreateFileAsync(SavegameListFileName);
+                Debug.WriteLine("Created new savegame list with Id " + id);
             }
             else if (fileIds.Count == 1)
             {
-                Debug.WriteLine("savegame-list.txt exists already");
+                Debug.WriteLine("Savegame list exists already");
             }
             else
             {
-                Debug.WriteLine("Error: have " + fileIds.Count + " savegame-list.txt files");
+                Debug.WriteLine("Error: have " + fileIds.Count + " savegame list files");
             }
         }
     }
