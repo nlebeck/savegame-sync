@@ -23,8 +23,8 @@ while still protecting users' data at all costs.
 
 ## Repository organization
 SavegameSync is a Visual Studio solution directory. The subdirectory
-SavegameSyncWPF holds the version of the app that I'm currently working on,
-while the SavegameSync subdirectory holds the UWP version of the app that I
+SavegameSync holds the version of the app that I'm currently working on,
+while the SavegameSyncUWP subdirectory holds the UWP version of the app that I
 started on but abandoned due to difficulties fixing dependency issues between
 UWP and the Google Drive NuGet package.
 
