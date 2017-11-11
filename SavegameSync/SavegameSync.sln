@@ -1,11 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.26403.7
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavegameSync", "SavegameSync\SavegameSync.csproj", "{1BDDEDE5-0507-4616-9EDA-88F89C351238}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavegameSyncUWP", "SavegameSyncUWP\SavegameSyncUWP.csproj", "{1BDDEDE5-0507-4616-9EDA-88F89C351238}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavegameSyncWPF", "SavegameSyncWPF\SavegameSyncWPF.csproj", "{7B24B5C2-22B1-432F-BE0D-944D5F23FC3E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SavegameSync", "SavegameSync\SavegameSync.csproj", "{7B24B5C2-22B1-432F-BE0D-944D5F23FC3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
