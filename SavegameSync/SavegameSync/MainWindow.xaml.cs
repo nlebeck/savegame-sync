@@ -145,6 +145,22 @@ namespace SavegameSyncWPF
             return service;
         }
 
+        private async Task DownloadFile(string fileId, Stream stream)
+        {
+            FilesResource.GetRequest getRequest = service.Files.Get(fileId);
+            await getRequest.DownloadAsync(stream);
+        }
+
+        private async Task UploadFile(string fileId, Stream stream, Google.Apis.Drive.v3.Data.File file = null)
+        {
+            if (file == null)
+            {
+                file = new Google.Apis.Drive.v3.Data.File();
+            }
+            FilesResource.UpdateMediaUpload updateMediaUpload = service.Files.Update(file, fileId, stream, file.MimeType);
+            await updateMediaUpload.UploadAsync();
+        }
+
         private async Task CheckSavegameListFile()
         {
             List<string> fileIds = await SearchFileByNameAsync(SavegameListFileName);
@@ -161,6 +177,37 @@ namespace SavegameSyncWPF
             {
                 Debug.WriteLine("Error: have " + fileIds.Count + " savegame list files");
             }
+
+            await DebugCheckFileDownloadUpload(fileIds[0]);
+        }
+
+        private async Task DebugCheckFileDownloadUpload(string fileId)
+        {
+            MemoryStream stream = new MemoryStream();
+            await DownloadFile(fileId, stream);
+            Debug.WriteLine("Stream length: " + stream.Length);
+            Debug.WriteLine("Stream position: " + stream.Position);
+            stream.Position = 0;
+            byte[] streamContents = new byte[stream.Length];
+            int bytesRead = stream.Read(streamContents, 0, (int)stream.Length);
+            Debug.WriteLine("Bytes read: " + bytesRead);
+            char[] streamChars = new char[stream.Length];
+            for (int i = 0; i < stream.Length; i++)
+            {
+                streamChars[i] = (char)streamContents[i];
+            }
+            Debug.WriteLine(new string(streamChars));
+
+            MemoryStream newContentStream = new MemoryStream();
+            string testStr = "Testing";
+            byte[] buffer = new byte[testStr.Length];
+            for (int i = 0; i < testStr.Length; i++)
+            {
+                buffer[i] = (byte)testStr[i];
+            }
+            newContentStream.Write(buffer, 0, buffer.Length);
+
+            await UploadFile(fileId, newContentStream);
         }
     }
 }
