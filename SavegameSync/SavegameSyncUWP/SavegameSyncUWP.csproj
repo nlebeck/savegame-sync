@@ -7,8 +7,8 @@
     <ProjectGuid>{1BDDEDE5-0507-4616-9EDA-88F89C351238}</ProjectGuid>
     <OutputType>AppContainerExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>SavegameSync</RootNamespace>
-    <AssemblyName>SavegameSync</AssemblyName>
+    <RootNamespace>SavegameSyncUWP</RootNamespace>
+    <AssemblyName>SavegameSyncUWP</AssemblyName>
     <DefaultLanguage>en-US</DefaultLanguage>
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion>10.0.14393.0</TargetPlatformVersion>

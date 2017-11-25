@@ -1,7 +1,7 @@
-﻿<Application x:Class="SavegameSyncWPF.App"
+﻿<Application x:Class="SavegameSync.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:SavegameSyncWPF"
+             xmlns:local="clr-namespace:SavegameSync"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
          
