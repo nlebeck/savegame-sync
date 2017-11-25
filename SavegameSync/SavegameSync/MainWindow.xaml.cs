@@ -188,26 +188,22 @@ namespace SavegameSyncWPF
             Debug.WriteLine("Stream length: " + stream.Length);
             Debug.WriteLine("Stream position: " + stream.Position);
             stream.Position = 0;
-            byte[] streamContents = new byte[stream.Length];
-            int bytesRead = stream.Read(streamContents, 0, (int)stream.Length);
-            Debug.WriteLine("Bytes read: " + bytesRead);
-            char[] streamChars = new char[stream.Length];
-            for (int i = 0; i < stream.Length; i++)
+            StreamReader streamReader = new StreamReader(stream);
+            while (!streamReader.EndOfStream)
             {
-                streamChars[i] = (char)streamContents[i];
+                string line = streamReader.ReadLine();
+                Debug.WriteLine(line);
             }
-            Debug.WriteLine(new string(streamChars));
+            streamReader.Close();
 
             MemoryStream newContentStream = new MemoryStream();
             string testStr = "Testing";
-            byte[] buffer = new byte[testStr.Length];
-            for (int i = 0; i < testStr.Length; i++)
-            {
-                buffer[i] = (byte)testStr[i];
-            }
-            newContentStream.Write(buffer, 0, buffer.Length);
+            StreamWriter streamWriter = new StreamWriter(newContentStream);
+            streamWriter.WriteLine(testStr);
+            streamWriter.Flush();
 
             await UploadFile(fileId, newContentStream);
+            streamWriter.Close();
         }
     }
 }
