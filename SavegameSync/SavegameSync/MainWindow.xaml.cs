@@ -29,6 +29,8 @@ namespace SavegameSync
     /// </summary>
     public partial class MainWindow : Window
     {
+        public const int SavesPerGame = 5;
+
         private const string ApplicationName = "Savegame Sync";
         private const string SavegameListFileName = "savegame-list.txt";
 
@@ -178,7 +180,27 @@ namespace SavegameSync
                 Debug.WriteLine("Error: have " + fileIds.Count + " savegame list files");
             }
 
-            await DebugCheckFileDownloadUpload(fileIds[0]);
+            SavegameList list = await ReadSavegameList(fileIds[0]);
+            list.DebugPrintGames();
+            list.DebugPrintSaves("MOHAA");
+            //list.AddSave("MOHAA", "23094sdlkj", "100102330");
+           await WriteSavegameList(list, fileIds[0]);
+        }
+
+        private async Task<SavegameList> ReadSavegameList(string fileId)
+        {
+            MemoryStream stream = new MemoryStream();
+            await DownloadFile(fileId, stream);
+            return new SavegameList(stream);
+        }
+
+        private async Task WriteSavegameList(SavegameList list, string fileId)
+        {
+            MemoryStream stream = new MemoryStream();
+
+            list.WriteToStream(stream);
+            await UploadFile(fileId, stream);
+            stream.Close();
         }
 
         private async Task DebugCheckFileDownloadUpload(string fileId)
