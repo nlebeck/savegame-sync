@@ -33,6 +33,7 @@ namespace SavegameSync
 
         private const string ApplicationName = "Savegame Sync";
         private const string SavegameListFileName = "savegame-list.txt";
+        private const string LocalGameListFileName = "local-game-list.txt";
 
         private DriveService service;
 
@@ -46,6 +47,7 @@ namespace SavegameSync
             base.OnInitialized(e);
             service = await LoginToGoogleDrive();
             await CheckSavegameListFile();
+            CheckLocalGameListFile();
         }
 
         /// <summary>
@@ -185,6 +187,20 @@ namespace SavegameSync
             list.DebugPrintSaves("MOHAA");
             //list.AddSave("MOHAA", "23094sdlkj", "100102330");
            await WriteSavegameList(list, fileIds[0]);
+        }
+
+        private void CheckLocalGameListFile()
+        {
+            FileStream localGameListStream = System.IO.File.Open(LocalGameListFileName, FileMode.OpenOrCreate);
+            LocalGameList localGameList = new LocalGameList(localGameListStream);
+            localGameListStream.Close();
+            localGameList.DebugPrintGames();
+            if (!localGameList.ContainsGame("MadeUpGame2"))
+            {
+                localGameList.AddGame("MadeUpGame2", "C:\\Games\\MadeUpGame");
+            }
+            FileStream localGameListWriteStream = System.IO.File.Open(LocalGameListFileName, FileMode.Open);
+            localGameList.WriteToStream(localGameListWriteStream);
         }
 
         private async Task<SavegameList> ReadSavegameList(string fileId)
