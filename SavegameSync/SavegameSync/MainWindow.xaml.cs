@@ -46,8 +46,8 @@ namespace SavegameSync
         {
             base.OnInitialized(e);
             service = await LoginToGoogleDrive();
-            await CheckSavegameListFile();
-            CheckLocalGameListFile();
+            await DebugCheckSavegameListFile();
+            await DebugCheckLocalGameListFile();
         }
 
         /// <summary>
@@ -165,7 +165,7 @@ namespace SavegameSync
             await updateMediaUpload.UploadAsync();
         }
 
-        private async Task CheckSavegameListFile()
+        private async Task DebugCheckSavegameListFile()
         {
             List<string> fileIds = await SearchFileByNameAsync(SavegameListFileName);
             if (fileIds.Count == 0)
@@ -189,32 +189,35 @@ namespace SavegameSync
            await WriteSavegameList(list, fileIds[0]);
         }
 
-        private void CheckLocalGameListFile()
+        private async Task DebugCheckLocalGameListFile()
         {
+            LocalGameList localGameList = new LocalGameList();
             FileStream localGameListStream = System.IO.File.Open(LocalGameListFileName, FileMode.OpenOrCreate);
-            LocalGameList localGameList = new LocalGameList(localGameListStream);
+            await localGameList.ReadFromStream(localGameListStream);
             localGameListStream.Close();
             localGameList.DebugPrintGames();
-            if (!localGameList.ContainsGame("MadeUpGame2"))
+            if (!localGameList.ContainsGame("MadeUpGame"))
             {
-                localGameList.AddGame("MadeUpGame2", "C:\\Games\\MadeUpGame");
+                localGameList.AddGame("MadeUpGame", "C:\\Games\\MadeUpGame");
             }
             FileStream localGameListWriteStream = System.IO.File.Open(LocalGameListFileName, FileMode.Open);
-            localGameList.WriteToStream(localGameListWriteStream);
+            await localGameList.WriteToStream(localGameListWriteStream);
         }
 
         private async Task<SavegameList> ReadSavegameList(string fileId)
         {
             MemoryStream stream = new MemoryStream();
             await DownloadFile(fileId, stream);
-            return new SavegameList(stream);
+            SavegameList savegameList = new SavegameList();
+            await savegameList.ReadFromStream(stream);
+            return savegameList;
         }
 
         private async Task WriteSavegameList(SavegameList list, string fileId)
         {
             MemoryStream stream = new MemoryStream();
 
-            list.WriteToStream(stream);
+            await list.WriteToStream(stream);
             await UploadFile(fileId, stream);
             stream.Close();
         }

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SavegameSync
 {
@@ -9,13 +10,13 @@ namespace SavegameSync
     {
         private Dictionary<string, string> gameInstallDirs = new Dictionary<string, string>();
 
-        public LocalGameList(Stream stream)
+        public async Task ReadFromStream(Stream stream)
         {
             stream.Position = 0;
             StreamReader streamReader = new StreamReader(stream);
             while (!streamReader.EndOfStream)
             {
-                string line = streamReader.ReadLine();
+                string line = await streamReader.ReadLineAsync();
                 string[] lineSplit = line.Split('\t');
                 string gameName = lineSplit[0];
                 string installDir = lineSplit[1];
@@ -24,14 +25,14 @@ namespace SavegameSync
             streamReader.Close();
         }
 
-        public void WriteToStream(Stream stream)
+        public async Task WriteToStream(Stream stream)
         {
             StreamWriter streamWriter = new StreamWriter(stream);
             foreach (string gameName in gameInstallDirs.Keys)
             {
-                streamWriter.Write($"{gameName}\t{gameInstallDirs[gameName]}\n");
+                await streamWriter.WriteAsync($"{gameName}\t{gameInstallDirs[gameName]}\n");
             }
-            streamWriter.Flush();
+            await streamWriter.FlushAsync();
         }
 
         public void AddGame(string gameName, string installDir)

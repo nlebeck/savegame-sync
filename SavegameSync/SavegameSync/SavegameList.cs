@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading.Tasks;
 
 namespace SavegameSync
 {
@@ -11,27 +12,17 @@ namespace SavegameSync
     /// </summary>
     public class SavegameList
     {
-        private class GameEntry
-        {
-            public string GameName { get; set; }
-            public Queue<Tuple<string, string>> saves { get; set; }
-
-            public GameEntry() {
-                saves = new Queue<Tuple<string, string>>();
-            }
-        }
-
         private Dictionary<string, Queue<Tuple<string, string>>> gameEntries =
             new Dictionary<string, Queue<Tuple<string, string>>>();
 
-        public SavegameList(Stream stream)
+        public async Task ReadFromStream(Stream stream)
         {
             stream.Position = 0;
             StreamReader streamReader = new StreamReader(stream);
             while (!streamReader.EndOfStream)
             {
-                string line = streamReader.ReadLine();
-                string[] lineSplit = line.Split(new char[] { '\t' });
+                string line = await streamReader.ReadLineAsync();
+                string[] lineSplit = line.Split('\t');
                 string gameName = lineSplit[0];
                 gameEntries[gameName] = new Queue<Tuple<string, string>>();
                 int index = 1;
@@ -47,21 +38,19 @@ namespace SavegameSync
             streamReader.Close();
         }
 
-        public SavegameList() { }
-
-        public void WriteToStream(Stream stream)
+        public async Task WriteToStream(Stream stream)
         {
             StreamWriter streamWriter = new StreamWriter(stream);
             foreach (string entry in gameEntries.Keys)
             {
-                streamWriter.Write(entry);
+                await streamWriter.WriteAsync(entry);
                 foreach (Tuple<string, string> save in gameEntries[entry])
                 {
-                    streamWriter.Write("\t" + save.Item1 + "\t" + save.Item2);
+                    await streamWriter.WriteAsync($"\t{save.Item1}\t{save.Item2}");
                 }
-                streamWriter.WriteLine();
+                await streamWriter.WriteLineAsync();
             }
-            streamWriter.Flush();
+            await streamWriter.FlushAsync();
         }
 
         public void AddSave(string gameName, string saveGuid, string saveTimestamp)
@@ -97,7 +86,7 @@ namespace SavegameSync
             Debug.Write(gameName);
             foreach (Tuple<string, string> save in saves)
             {
-                Debug.Write(" " + save.Item1 + " " + save.Item2);
+                Debug.Write($" {save.Item1} {save.Item2}");
             }
             Debug.WriteLine("");
         }
@@ -107,7 +96,7 @@ namespace SavegameSync
             Debug.Write("Games:");
             foreach (string gameName in GetGames())
             {
-                Debug.Write(" " + gameName);
+                Debug.Write($" {gameName}");
             }
             Debug.WriteLine("");
         }
