@@ -2,8 +2,6 @@
 using Google.Apis.Drive.v3;
 using Google.Apis.Services;
 using Google.Apis.Util.Store;
-using Microsoft.OneDrive.Sdk;
-using Microsoft.OneDrive.Sdk.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -192,7 +190,7 @@ namespace SavegameSync
         private async Task DebugCheckLocalGameListFile()
         {
             LocalGameList localGameList = new LocalGameList();
-            FileStream localGameListStream = System.IO.File.Open(LocalGameListFileName, FileMode.OpenOrCreate);
+            FileStream localGameListStream = File.Open(LocalGameListFileName, FileMode.OpenOrCreate);
             await localGameList.ReadFromStream(localGameListStream);
             localGameListStream.Close();
             localGameList.DebugPrintGames();
@@ -200,8 +198,32 @@ namespace SavegameSync
             {
                 localGameList.AddGame("MadeUpGame", "C:\\Games\\MadeUpGame");
             }
-            FileStream localGameListWriteStream = System.IO.File.Open(LocalGameListFileName, FileMode.Open);
+            FileStream localGameListWriteStream = File.Open(LocalGameListFileName, FileMode.Open);
             await localGameList.WriteToStream(localGameListWriteStream);
+        }
+
+        private void DebugZipAndUploadSave()
+        {
+            string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
+            SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
+            ZipSaveFiles(mohaaSpec);
+        }
+
+        private void ZipSaveFiles(SaveSpec saveSpec)
+        {
+            //TODO: finish writing this method
+
+            foreach (string path in saveSpec.SavePaths)
+            {
+                if (Directory.Exists(path))
+                {
+
+                }
+                else if (File.Exists(path))
+                {
+
+                }
+            }
         }
 
         private async Task<SavegameList> ReadSavegameList(string fileId)

@@ -108,8 +108,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="FileUtils.cs" />
     <Compile Include="LocalGameList.cs" />
     <Compile Include="SavegameList.cs" />
+    <Compile Include="SaveSpec.cs" />
+    <Compile Include="SaveSpecRepository.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
