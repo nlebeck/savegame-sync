@@ -19,8 +19,8 @@ namespace SavegameSync
 
         private SaveSpecRepository()
         {
-            SaveSpec mohaaSpec = new SaveSpec("Medal of Honor Allied Assault War Chest", new string[]{ "\\main\\save" });
-            saveSpecs.Add("Medal of Honor Allied Assault War Chest", mohaaSpec);
+            SaveSpec mohaaSpec = new SaveSpec("Medal of Honor Allied Assault War Chest", new string[]{ "main\\save" });
+            saveSpecs.Add(mohaaSpec.GameName, mohaaSpec);
         }
 
         public SaveSpec GetSaveSpec(string gameName)

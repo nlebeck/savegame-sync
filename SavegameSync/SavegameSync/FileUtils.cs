@@ -1,14 +1,49 @@
-﻿using System.Linq;
+﻿using System.IO;
+using System.Linq;
 
 namespace SavegameSync
 {
     public static class FileUtils
     {
-        public static void CopyDirectoryContents(string sourceDir, string destDir)
+        /*
+         * Based on this MSDN example: https://docs.microsoft.com/en-us/dotnet/standard/io/how-to-copy-directories.
+         */
+        public static void CopyDirectory(string originalDir, string destDir)
         {
-            //TODO: implement this
+            DirectoryInfo dirInfo = new DirectoryInfo(originalDir);
+            if (!Directory.Exists(destDir))
+            {
+                Directory.CreateDirectory(destDir);
+            }
+
+            FileInfo[] files = dirInfo.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                string destFilePath = Path.Combine(destDir, file.Name);
+                file.CopyTo(destFilePath);
+            }
+
+            DirectoryInfo[] subdirs = dirInfo.GetDirectories();
+            foreach (DirectoryInfo subdir in subdirs)
+            {
+                string destSubdirPath = Path.Combine(destDir, subdir.Name);
+                CopyDirectory(subdir.FullName, destSubdirPath);
+            }
         }
 
+        public static void DeleteIfExists(string path)
+        {
+            if (File.Exists(path))
+            {
+                File.Delete(path);
+            }
+            else if (Directory.Exists(path))
+            {
+                Directory.Delete(path, true);
+            }
+        }
+
+        //TODO: Figure out if this method is unnecessary
         public static string GetPathSuffix(string path, string pathPrefix)
         {
             if (path.StartsWith(pathPrefix))
@@ -18,6 +53,7 @@ namespace SavegameSync
             return null;
         }
 
+        //TODO: Figure out if this method is unnecessary
         public static string GetFullPath(string pathPrefix, string pathSuffix)
         {
             string sep = "";
@@ -28,6 +64,7 @@ namespace SavegameSync
             return pathPrefix + sep + pathSuffix;
         }
 
+        //TODO: Figure out if this method is unnecessary
         /// <summary>
         /// Create a new directory at the given path, creating any necessary parent directories.
         /// </summary>
@@ -36,6 +73,7 @@ namespace SavegameSync
             //TODO: implement this
         }
 
+        //TODO: Figure out if this method is unnecessary
         public static string GetParentDirectoryPath(string path)
         {
             string[] split = path.Split('\\');

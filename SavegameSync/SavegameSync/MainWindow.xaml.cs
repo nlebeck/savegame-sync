@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading;
@@ -46,6 +47,8 @@ namespace SavegameSync
             service = await LoginToGoogleDrive();
             await DebugCheckSavegameListFile();
             await DebugCheckLocalGameListFile();
+            DebugZipAndUploadSave();
+            Console.WriteLine("Done debugging!");
         }
 
         /// <summary>
@@ -206,22 +209,32 @@ namespace SavegameSync
         {
             string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
             SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
-            ZipSaveFiles(mohaaSpec);
+            string destDir = "C:\\Users\\niell\\Git\\testmohaa";
+            string zipFile = "C:\\Users\\niell\\Git\\testmohaa.zip";
+            CopySaveFiles(mohaaSpec, installDir, destDir);
+            FileUtils.DeleteIfExists(zipFile);
+            ZipFile.CreateFromDirectory(destDir, zipFile);
         }
 
-        private void ZipSaveFiles(SaveSpec saveSpec)
+        private void CopySaveFiles(SaveSpec saveSpec, string rootDir, string destDir)
         {
-            //TODO: finish writing this method
-
-            foreach (string path in saveSpec.SavePaths)
+            FileUtils.DeleteIfExists(destDir);
+            Directory.CreateDirectory(destDir);
+            foreach (string subPath in saveSpec.SavePaths)
             {
-                if (Directory.Exists(path))
+                string originalPath = System.IO.Path.Combine(rootDir, subPath);
+                string destPath = System.IO.Path.Combine(destDir, subPath);
+                if (Directory.Exists(originalPath))
                 {
-
+                    FileUtils.CopyDirectory(originalPath, destPath);
                 }
-                else if (File.Exists(path))
+                else if (File.Exists(originalPath))
                 {
-
+                    File.Copy(originalPath, destPath);
+                }
+                else
+                {
+                    Console.WriteLine("Skipping missing subpath " + subPath);
                 }
             }
         }
