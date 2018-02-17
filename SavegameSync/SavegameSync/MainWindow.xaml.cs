@@ -210,12 +210,24 @@ namespace SavegameSync
             string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
             SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
             string destDir = "C:\\Users\\niell\\Git\\testmohaa";
-            string zipFile = "C:\\Users\\niell\\Git\\testmohaa.zip";
             CopySaveFiles(mohaaSpec, installDir, destDir);
-            FileUtils.DeleteIfExists(zipFile);
-            ZipFile.CreateFromDirectory(destDir, zipFile);
+
             DateTime latestFileWriteTime = FileUtils.GetLatestFileWriteTime(destDir);
             Console.WriteLine("Latest write time: " + latestFileWriteTime);
+
+            Guid saveGuid = Guid.NewGuid();
+            Console.WriteLine("Guid: " + saveGuid);
+            string zipFile = "C:\\Users\\niell\\Git\\" + saveGuid + ".zip";
+            FileUtils.DeleteIfExists(zipFile);
+            ZipFile.CreateFromDirectory(destDir, zipFile);
+
+            //TODO: upload save
+
+            //TODO: download latest version of SavegameList
+
+            //TODO: add save to SavegameList
+
+            //TODO: upload SavegameList
         }
 
         private void CopySaveFiles(SaveSpec saveSpec, string rootDir, string destDir)
