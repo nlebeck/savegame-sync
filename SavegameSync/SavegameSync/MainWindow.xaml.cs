@@ -214,6 +214,8 @@ namespace SavegameSync
             CopySaveFiles(mohaaSpec, installDir, destDir);
             FileUtils.DeleteIfExists(zipFile);
             ZipFile.CreateFromDirectory(destDir, zipFile);
+            DateTime latestFileWriteTime = FileUtils.GetLatestFileWriteTime(destDir);
+            Console.WriteLine("Latest write time: " + latestFileWriteTime);
         }
 
         private void CopySaveFiles(SaveSpec saveSpec, string rootDir, string destDir)

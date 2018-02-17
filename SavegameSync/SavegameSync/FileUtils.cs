@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Linq;
 
 namespace SavegameSync
@@ -29,6 +30,37 @@ namespace SavegameSync
                 string destSubdirPath = Path.Combine(destDir, subdir.Name);
                 CopyDirectory(subdir.FullName, destSubdirPath);
             }
+        }
+
+        /// <summary>
+        /// Get the latest LastWriteTime of any file in the given directory or its subdirectories.
+        /// </summary>
+        public static DateTime GetLatestFileWriteTime(string dir)
+        {
+            DirectoryInfo dirInfo = new DirectoryInfo(dir);
+            DateTime latestFileWriteTime = new DateTime(1900, 1, 1);
+
+            FileInfo[] files = dirInfo.GetFiles();
+            foreach (FileInfo file in files)
+            {
+                DateTime curDateTime = file.LastWriteTimeUtc;
+                if (curDateTime > latestFileWriteTime)
+                {
+                    latestFileWriteTime = curDateTime;
+                }
+            }
+
+            DirectoryInfo[] subDirs = dirInfo.GetDirectories();
+            foreach (DirectoryInfo subDir in subDirs)
+            {
+                DateTime curDateTime = GetLatestFileWriteTime(subDir.FullName);
+                if (curDateTime > latestFileWriteTime)
+                {
+                    latestFileWriteTime = curDateTime;
+                }
+            }
+
+            return latestFileWriteTime;
         }
 
         public static void DeleteIfExists(string path)
