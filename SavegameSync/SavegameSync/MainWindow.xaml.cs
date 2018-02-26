@@ -48,6 +48,7 @@ namespace SavegameSync
             await DebugCheckSavegameListFile();
             await DebugCheckLocalGameListFile();
             DebugZipAndUploadSave();
+            await DebugGoogleDriveFunctions();
             Console.WriteLine("Done debugging!");
         }
 
@@ -91,11 +92,45 @@ namespace SavegameSync
                 {
                     Debug.WriteLine("Retrieving another page");
                     FilesResource.ListRequest newListRequest = service.Files.List();
+                    newListRequest.Spaces = "appDataFolder";
+                    newListRequest.PageSize = 10;
                     newListRequest.PageToken = fileList.NextPageToken;
                     fileList = await newListRequest.ExecuteAsync();
                 }
             }
             return fileIds;
+        }
+
+        private async Task<List<Google.Apis.Drive.v3.Data.File>> GetAllFilesAsync()
+        {
+            List<Google.Apis.Drive.v3.Data.File> result = new List<Google.Apis.Drive.v3.Data.File>();
+
+            FilesResource.ListRequest listRequest = service.Files.List();
+            listRequest.Spaces = "appDataFolder";
+            listRequest.PageSize = 10;
+
+            bool done = false;
+            Google.Apis.Drive.v3.Data.FileList fileList = await listRequest.ExecuteAsync();
+            while (!done)
+            {
+                IList<Google.Apis.Drive.v3.Data.File> files = fileList.Files;
+                result.AddRange(files);
+                if (fileList.NextPageToken == null)
+                {
+                    Debug.WriteLine("Processed last page");
+                    done = true;
+                }
+                else
+                {
+                    Debug.WriteLine("Retrieving another page");
+                    FilesResource.ListRequest newListRequest = service.Files.List();
+                    newListRequest.Spaces = "appDataFolder";
+                    newListRequest.PageSize = 10;
+                    newListRequest.PageToken = fileList.NextPageToken;
+                    fileList = await newListRequest.ExecuteAsync();
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -116,6 +151,12 @@ namespace SavegameSync
             createRequest.Fields = "id";
             var responseFile = await createRequest.ExecuteAsync();
             return responseFile.Id;
+        }
+
+        private async Task DeleteFileAsync(string fileId)
+        {
+            FilesResource.DeleteRequest deleteRequest = service.Files.Delete(fileId);
+            await deleteRequest.ExecuteAsync();
         }
 
         /*
@@ -228,6 +269,38 @@ namespace SavegameSync
             //TODO: add save to SavegameList
 
             //TODO: upload SavegameList
+        }
+
+        private async Task DebugGoogleDriveFunctions()
+        {
+            List<string> dummyFileIds = new List<string>();
+            for (int i = 0; i < 20; i++)
+            {
+                Console.WriteLine("Creating dummy file " + i);
+                dummyFileIds.Add(await CreateFileAsync("DummyFile" + i));
+            }
+
+            var fileList = await GetAllFilesAsync();
+            Console.WriteLine("Printing all files for the first time");
+            foreach (Google.Apis.Drive.v3.Data.File file in fileList)
+            {
+                Console.WriteLine($"{file.Name}, {file.Id}");
+            }
+            Console.WriteLine("Done printing all files for the first time");
+
+            for (int i = 0; i < dummyFileIds.Count; i++)
+            {
+                Console.WriteLine("Deleting dummy file " + i);
+                await DeleteFileAsync(dummyFileIds[i]);
+            }
+
+            fileList = await GetAllFilesAsync();
+            Console.WriteLine("Printing all files for the second time");
+            foreach (Google.Apis.Drive.v3.Data.File file in fileList)
+            {
+                Console.WriteLine($"{file.Name}, {file.Id}");
+            }
+            Console.WriteLine("Done printing all files for the second time");
         }
 
         private void CopySaveFiles(SaveSpec saveSpec, string rootDir, string destDir)
