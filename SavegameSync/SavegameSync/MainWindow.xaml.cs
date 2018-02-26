@@ -48,66 +48,52 @@ namespace SavegameSync
             await DebugCheckSavegameListFile();
             await DebugCheckLocalGameListFile();
             DebugZipAndUploadSave();
-            await DebugGoogleDriveFunctions();
             Console.WriteLine("Done debugging!");
         }
 
         /// <summary>
         /// Search for files in the appDataFolder having the given name.
         /// </summary>
-        /// <param name="name">The filename to search for</param>
-        /// <returns>A list of file IDs matching the given filename</returns>
+        /// <param name="name">The filename to search for.</param>
+        /// <returns>A list of File objects matching the given filename.</returns>
+        private async Task<List<Google.Apis.Drive.v3.Data.File>> SearchFileByNameAsync(string name)
+        {
+            return await ListFilesHelperAsync(string.Format("name = '{0}'", name));
+        }
+
+        /// <summary>
+        /// List all files in the appDataFolder.
+        /// </summary>
+        /// <returns>A list of File objects corresponding to all files in the appDataFolder.
+        /// </returns>
+        private async Task<List<Google.Apis.Drive.v3.Data.File>> GetAllFilesAsync()
+        {
+            return await ListFilesHelperAsync(null);
+        }
+
+        /// <summary>
+        /// List files in the appDataFolder matching the given query string.
+        /// </summary>
+        /// <param name="query">The query string to use when searching. Set to null to list all
+        /// files.</param>
+        /// <returns>A list of File objects matching the given query string.</returns>
         /// <remarks>
+        /// See https://developers.google.com/drive/v3/web/search-parameters for documentation of
+        /// the query string.
+        /// 
         /// TODO: Figure out how to tell if the initial request or subsequent pagination failed,
         ///       and handle those cases appropriately.
         /// </remarks>
-        private async Task<List<string>> SearchFileByNameAsync(string name)
-        {
-            List<string> fileIds = new List<string>();
-
-            FilesResource.ListRequest listRequest = service.Files.List();
-            listRequest.Spaces = "appDataFolder";
-            listRequest.PageSize = 10;
-            listRequest.Fields = "nextPageToken, files(id, name)";
-            listRequest.Q = string.Format("name = '{0}'", name);
-
-            bool done = false;
-            Google.Apis.Drive.v3.Data.FileList fileList = await listRequest.ExecuteAsync();
-            while (!done)
-            {
-                IList<Google.Apis.Drive.v3.Data.File> files = fileList.Files;
-                if (files != null)
-                {
-                    foreach (var file in files)
-                    {
-                        fileIds.Add(file.Id);
-                    }
-                }
-                if (fileList.NextPageToken == null)
-                {
-                    Debug.WriteLine("Processed last page");
-                    done = true;
-                }
-                else
-                {
-                    Debug.WriteLine("Retrieving another page");
-                    FilesResource.ListRequest newListRequest = service.Files.List();
-                    newListRequest.Spaces = "appDataFolder";
-                    newListRequest.PageSize = 10;
-                    newListRequest.PageToken = fileList.NextPageToken;
-                    fileList = await newListRequest.ExecuteAsync();
-                }
-            }
-            return fileIds;
-        }
-
-        private async Task<List<Google.Apis.Drive.v3.Data.File>> GetAllFilesAsync()
+        private async Task<List<Google.Apis.Drive.v3.Data.File>> ListFilesHelperAsync(string query)
         {
             List<Google.Apis.Drive.v3.Data.File> result = new List<Google.Apis.Drive.v3.Data.File>();
 
             FilesResource.ListRequest listRequest = service.Files.List();
             listRequest.Spaces = "appDataFolder";
-            listRequest.PageSize = 10;
+            if (query != null)
+            {
+                listRequest.Q = query;
+            }
 
             bool done = false;
             Google.Apis.Drive.v3.Data.FileList fileList = await listRequest.ExecuteAsync();
@@ -153,10 +139,26 @@ namespace SavegameSync
             return responseFile.Id;
         }
 
+        /// <summary>
+        /// Delete a file in the appDataFolder.
+        /// </summary>
+        /// <param name="fileId">The ID of the file to delete.</param>
         private async Task DeleteFileAsync(string fileId)
         {
             FilesResource.DeleteRequest deleteRequest = service.Files.Delete(fileId);
             await deleteRequest.ExecuteAsync();
+        }
+
+        /// <summary>
+        /// Delete all files in the appDataFolder.
+        /// </summary>
+        private async Task DeleteAllFilesAsync()
+        {
+            List<Google.Apis.Drive.v3.Data.File> files = await GetAllFilesAsync();
+            foreach (Google.Apis.Drive.v3.Data.File file in files)
+            {
+                await DeleteFileAsync(file.Id);
+            }
         }
 
         /*
@@ -209,26 +211,28 @@ namespace SavegameSync
 
         private async Task DebugCheckSavegameListFile()
         {
-            List<string> fileIds = await SearchFileByNameAsync(SavegameListFileName);
-            if (fileIds.Count == 0)
+            List<Google.Apis.Drive.v3.Data.File> files = await SearchFileByNameAsync(SavegameListFileName);
+            string id = null;
+            if (files.Count == 0)
             {
-                string id = await CreateFileAsync(SavegameListFileName);
+                id = await CreateFileAsync(SavegameListFileName);
                 Debug.WriteLine("Created new savegame list with Id " + id);
             }
-            else if (fileIds.Count == 1)
+            else if (files.Count == 1)
             {
+                id = files[0].Id;
                 Debug.WriteLine("Savegame list exists already");
             }
             else
             {
-                Debug.WriteLine("Error: have " + fileIds.Count + " savegame list files");
+                Debug.WriteLine("Error: have " + files.Count + " savegame list files");
             }
 
-            SavegameList list = await ReadSavegameList(fileIds[0]);
+            SavegameList list = await ReadSavegameList(id);
             list.DebugPrintGames();
             list.DebugPrintSaves("MOHAA");
             //list.AddSave("MOHAA", "23094sdlkj", "100102330");
-           await WriteSavegameList(list, fileIds[0]);
+           await WriteSavegameList(list, id);
         }
 
         private async Task DebugCheckLocalGameListFile()
