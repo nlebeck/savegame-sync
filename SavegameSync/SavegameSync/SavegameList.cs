@@ -59,7 +59,7 @@ namespace SavegameSync
             {
                 gameEntries[gameName] = new Queue<Tuple<string, string>>();
             }
-            if (gameEntries[gameName].Count >= MainWindow.SavesPerGame)
+            if (gameEntries[gameName].Count >= SavegameSyncEngine.SavesPerGame)
             {
                 gameEntries[gameName].Dequeue();
             }
