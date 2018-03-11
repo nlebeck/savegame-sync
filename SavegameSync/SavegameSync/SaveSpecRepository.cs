@@ -31,5 +31,10 @@ namespace SavegameSync
             }
             return null;
         }
+
+        public ICollection<SaveSpec> GetAllSaveSpecs()
+        {
+            return saveSpecs.Values;
+        }
     }
 }
