@@ -26,6 +26,7 @@ namespace SavegameSync
         private static SavegameSyncEngine singleton;
 
         private DriveService service;
+        private LocalGameList localGameList;
 
         public static SavegameSyncEngine GetInstance()
         {
@@ -34,6 +35,11 @@ namespace SavegameSync
                 singleton = new SavegameSyncEngine();
             }
             return singleton;
+        }
+
+        public async Task Init()
+        {
+            await ReadLocalGameList();
         }
 
         public async Task Login()
@@ -225,19 +231,41 @@ namespace SavegameSync
             await WriteSavegameList(list, id);
         }
 
-        public async Task DebugCheckLocalGameListFile()
+        public async Task ReadLocalGameList()
         {
-            LocalGameList localGameList = new LocalGameList();
+            localGameList = new LocalGameList();
             FileStream localGameListStream = File.Open(LocalGameListFileName, FileMode.OpenOrCreate);
             await localGameList.ReadFromStream(localGameListStream);
             localGameListStream.Close();
+        }
+
+        public async Task WriteLocalGameList()
+        {
+            FileStream localGameListWriteStream = File.Open(LocalGameListFileName, FileMode.Open);
+            await localGameList.WriteToStream(localGameListWriteStream);
+            localGameListWriteStream.Close();
+        }
+
+        public List<string> GetLocalGameNames()
+        {
+            return localGameList.GetGameNames();
+        }
+
+        public async Task AddLocalGame(string gameName, string installDir)
+        {
+            localGameList.AddGame(gameName, installDir);
+            await WriteLocalGameList();
+        }
+
+        public async Task DebugCheckLocalGameListFile()
+        {
+            await ReadLocalGameList();
             localGameList.DebugPrintGames();
             if (!localGameList.ContainsGame("MadeUpGame"))
             {
-                localGameList.AddGame("MadeUpGame", "C:\\Games\\MadeUpGame");
+                await AddLocalGame("MadeUpGame", "C:\\Games\\MadeUpGame");
+
             }
-            FileStream localGameListWriteStream = File.Open(LocalGameListFileName, FileMode.Open);
-            await localGameList.WriteToStream(localGameListWriteStream);
         }
 
         public void DebugZipAndUploadSave()

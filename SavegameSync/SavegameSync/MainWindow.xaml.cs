@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
 
@@ -22,14 +23,28 @@ namespace SavegameSync
         {
             base.OnInitialized(e);
             savegameSync = SavegameSyncEngine.GetInstance();
+            await savegameSync.Init();
             await savegameSync.Login();
+
             await savegameSync.DebugCheckSavegameListFile();
             await savegameSync.DebugCheckLocalGameListFile();
             savegameSync.DebugZipAndUploadSave();
             Console.WriteLine("Done debugging!");
+
+            UpdateLocalGameList();
         }
 
-        private void addGameButton_Click(object sender, RoutedEventArgs e)
+        private void UpdateLocalGameList()
+        {
+            listBox.Items.Clear();
+            List<string> localGameNames = savegameSync.GetLocalGameNames();
+            foreach (string gameName in localGameNames)
+            {
+                listBox.Items.Add(gameName);
+            }
+        }
+
+        private async void addGameButton_Click(object sender, RoutedEventArgs e)
         {
             string path = null;
             string gameName = null;
@@ -54,7 +69,8 @@ namespace SavegameSync
 
             if (path != null && gameName != null)
             {
-                //TODO: add game to local game list
+                await savegameSync.AddLocalGame(gameName, path);
+                UpdateLocalGameList();
             }
         }
     }

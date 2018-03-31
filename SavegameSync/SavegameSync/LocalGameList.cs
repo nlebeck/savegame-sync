@@ -54,6 +54,11 @@ namespace SavegameSync
             return (gameInstallDirs.ContainsKey(gameName));
         }
 
+        public List<string> GetGameNames()
+        {
+            return new List<string>(gameInstallDirs.Keys);
+        }
+
         public void DebugPrintGames()
         {
             Debug.Write("Installed games: ");
