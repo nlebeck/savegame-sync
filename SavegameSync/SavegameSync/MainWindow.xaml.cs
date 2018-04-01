@@ -22,9 +22,15 @@ namespace SavegameSync
         protected async override void OnInitialized(EventArgs e)
         {
             base.OnInitialized(e);
+
+            localGameListBox.Items.Add("Loading...");
+            cloudGameListBox.Items.Add("Loading...");
+
             savegameSync = SavegameSyncEngine.GetInstance();
             await savegameSync.Init();
             await savegameSync.Login();
+
+            loginStatusTextBlock.Text = "";
 
             await savegameSync.DebugCheckSavegameListFile();
             await savegameSync.DebugCheckLocalGameListFile();
@@ -32,15 +38,33 @@ namespace SavegameSync
             Console.WriteLine("Done debugging!");
 
             UpdateLocalGameList();
+            UpdateCloudGameList();
         }
 
         private void UpdateLocalGameList()
         {
-            listBox.Items.Clear();
+            localGameListBox.Items.Clear();
             List<string> localGameNames = savegameSync.GetLocalGameNames();
             foreach (string gameName in localGameNames)
             {
-                listBox.Items.Add(gameName);
+                localGameListBox.Items.Add(gameName);
+            }
+        }
+
+        private void UpdateCloudGameList()
+        {
+            cloudGameListBox.Items.Clear();
+            List<string> cloudGameNames = savegameSync.GetCloudGameNames();
+
+            if (cloudGameNames == null)
+            {
+                cloudGameListBox.Items.Add("Error: could not read list");
+                return;
+            }
+
+            foreach (string gameName in cloudGameNames)
+            {
+                cloudGameListBox.Items.Add(gameName);
             }
         }
 

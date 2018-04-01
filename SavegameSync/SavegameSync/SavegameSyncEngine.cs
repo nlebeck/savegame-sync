@@ -27,6 +27,8 @@ namespace SavegameSync
 
         private DriveService service;
         private LocalGameList localGameList;
+        private SavegameList savegameList;
+        private string savegameListFileId;
 
         public static SavegameSyncEngine GetInstance()
         {
@@ -207,28 +209,11 @@ namespace SavegameSync
 
         public async Task DebugCheckSavegameListFile()
         {
-            List<Google.Apis.Drive.v3.Data.File> files = await SearchFileByNameAsync(SavegameListFileName);
-            string id = null;
-            if (files.Count == 0)
-            {
-                id = await CreateFileAsync(SavegameListFileName);
-                Debug.WriteLine("Created new savegame list with Id " + id);
-            }
-            else if (files.Count == 1)
-            {
-                id = files[0].Id;
-                Debug.WriteLine("Savegame list exists already");
-            }
-            else
-            {
-                Debug.WriteLine("Error: have " + files.Count + " savegame list files");
-            }
-
-            SavegameList list = await ReadSavegameList(id);
-            list.DebugPrintGames();
-            list.DebugPrintSaves("MOHAA");
-            //list.AddSave("MOHAA", "23094sdlkj", "100102330");
-            await WriteSavegameList(list, id);
+            await ReadSavegameList();
+            savegameList.DebugPrintGames();
+            savegameList.DebugPrintSaves("MOHAA");
+            //savegameList.AddSave("MOHAA", "23094sdlkj", "100102330");
+            await WriteSavegameList();
         }
 
         public async Task ReadLocalGameList()
@@ -348,20 +333,80 @@ namespace SavegameSync
             }
         }
 
-        private async Task<SavegameList> ReadSavegameList(string fileId)
+        private async Task<string> GetSavegameListFileIdOrCreate()
         {
-            MemoryStream stream = new MemoryStream();
-            await DownloadFile(fileId, stream);
-            SavegameList savegameList = new SavegameList();
-            await savegameList.ReadFromStream(stream);
-            return savegameList;
+            if (savegameListFileId != null)
+            {
+                return savegameListFileId;
+            }
+
+            Debug.WriteLine("Looking up savegame list fileId (no fileId cached)");
+            List<Google.Apis.Drive.v3.Data.File> files = await SearchFileByNameAsync(SavegameListFileName);
+            string id = null;
+            if (files.Count == 0)
+            {
+                id = await CreateFileAsync(SavegameListFileName);
+                Debug.WriteLine("Created new savegame list with Id " + id);
+            }
+            else if (files.Count == 1)
+            {
+                id = files[0].Id;
+                Debug.WriteLine("Savegame list exists already");
+            }
+            else
+            {
+                Debug.WriteLine("Error: have " + files.Count + " savegame list files");
+            }
+
+            savegameListFileId = id;
+            return id;
         }
 
-        private async Task WriteSavegameList(SavegameList list, string fileId)
+        public List<string> GetCloudGameNames()
         {
+            if (savegameList == null)
+            {
+                return null;
+            }
+
+            return savegameList.GetGames();
+        }
+
+        private async Task ReadSavegameList()
+        {
+            string fileId = await GetSavegameListFileIdOrCreate();
+            if (fileId == null)
+            {
+                savegameList = null;
+                Debug.WriteLine("Error: savegame list fileId is null");
+                return;
+            }
+
+            MemoryStream stream = new MemoryStream();
+            await DownloadFile(fileId, stream);
+            savegameList = new SavegameList();
+            await savegameList.ReadFromStream(stream);
+        }
+
+        private async Task WriteSavegameList()
+        {
+            string fileId = await GetSavegameListFileIdOrCreate();
+
+            if (fileId == null)
+            {
+                Debug.WriteLine("Error: savegame list fileId is null");
+                return;
+            }
+
+            if (savegameList == null)
+            {
+                Debug.WriteLine("Error: savegame list is null");
+                return;
+            }
+
             MemoryStream stream = new MemoryStream();
 
-            await list.WriteToStream(stream);
+            await savegameList.WriteToStream(stream);
             await UploadFile(fileId, stream);
             stream.Close();
         }

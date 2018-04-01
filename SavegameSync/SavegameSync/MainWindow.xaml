@@ -7,11 +7,14 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <ListBox x:Name="listBox" HorizontalAlignment="Left" Height="146" Margin="36,74,0,0" VerticalAlignment="Top" Width="192"/>
+        <ListBox x:Name="localGameListBox" HorizontalAlignment="Left" Height="146" Margin="36,74,0,0" VerticalAlignment="Top" Width="192"/>
         <Button x:Name="copyToCloudButton" Content="Copy to cloud" HorizontalAlignment="Left" Height="23" Margin="35,225,0,0" VerticalAlignment="Top" Width="87"/>
         <Button x:Name="copyFromCloudButton" Content="Copy from cloud" HorizontalAlignment="Left" Height="23" Margin="127,225,0,0" VerticalAlignment="Top" Width="101"/>
         <Button x:Name="addGameButton" Content="Add game" HorizontalAlignment="Left" Height="23" Margin="163,46,0,0" VerticalAlignment="Top" Width="65" Click="addGameButton_Click"/>
         <TextBlock x:Name="loginStatusTextBlock" HorizontalAlignment="Left" Height="17" Margin="10,10,0,0" TextWrapping="Wrap" Text="Logging in..." VerticalAlignment="Top" Width="101"/>
+        <ListBox x:Name="cloudGameListBox" HorizontalAlignment="Left" Height="146" Margin="290,74,0,0" VerticalAlignment="Top" Width="192"/>
+        <TextBlock x:Name="cloudGameTextBlock" HorizontalAlignment="Left" Height="20" Margin="290,49,0,0" TextWrapping="Wrap" Text="Games in cloud" VerticalAlignment="Top" Width="82"/>
+        <TextBlock x:Name="localGameTextBlock" HorizontalAlignment="Left" Height="20" Margin="36,49,0,0" TextWrapping="Wrap" Text="Local games" VerticalAlignment="Top" Width="82"/>
 
     </Grid>
 </Window>
