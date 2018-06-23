@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="FileUtilsTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SavegameSyncUtilsTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

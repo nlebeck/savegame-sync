@@ -117,6 +117,7 @@
     <Compile Include="LocalGameList.cs" />
     <Compile Include="SavegameList.cs" />
     <Compile Include="SavegameSyncEngine.cs" />
+    <Compile Include="SavegameSyncUtils.cs" />
     <Compile Include="SaveSpec.cs" />
     <Compile Include="SaveSpecRepository.cs" />
     <Page Include="AddGameDialog.xaml">
