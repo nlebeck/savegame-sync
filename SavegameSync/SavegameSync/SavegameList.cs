@@ -61,12 +61,12 @@ namespace SavegameSync
         public async Task WriteToStream(Stream stream)
         {
             StreamWriter streamWriter = new StreamWriter(stream);
-            foreach (string entry in gameEntries.Keys)
+            foreach (string gameName in gameEntries.Keys)
             {
-                await streamWriter.WriteAsync(entry);
-                foreach (SavegameEntry save in gameEntries[entry])
+                await streamWriter.WriteAsync(gameName);
+                foreach (SavegameEntry entry in gameEntries[gameName])
                 {
-                    await streamWriter.WriteAsync($"\t{save.Serialize()}");
+                    await streamWriter.WriteAsync($"\t{entry.Serialize()}");
                 }
                 await streamWriter.WriteLineAsync();
             }
@@ -111,7 +111,7 @@ namespace SavegameSync
             Debug.WriteLine("");
         }
 
-        public void DebugPrintGames()
+        public void DebugPrintGameNames()
         {
             Debug.Write("Games:");
             foreach (string gameName in GetGames())

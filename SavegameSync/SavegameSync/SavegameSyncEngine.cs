@@ -210,7 +210,7 @@ namespace SavegameSync
         public async Task DebugCheckSavegameListFile()
         {
             await ReadSavegameList();
-            savegameList.DebugPrintGames();
+            savegameList.DebugPrintGameNames();
             savegameList.DebugPrintSaves("MOHAA");
             //savegameList.AddSave("MOHAA", Guid.NewGuid(), DateTime.Now);
             await WriteSavegameList();
