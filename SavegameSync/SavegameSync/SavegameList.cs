@@ -16,6 +16,19 @@ namespace SavegameSync
             Guid = guid;
             Timestamp = timestamp;
         }
+
+        public string Serialize()
+        {
+            return String.Format("{0},{1}", Guid.ToString(), SavegameSyncUtils.SerializeDateTime(Timestamp));
+        }
+
+        public static SavegameEntry Deserialize(string str)
+        {
+            string[] stringSplit = str.Split(',');
+            Guid guid = Guid.Parse(stringSplit[0]);
+            DateTime timestamp = SavegameSyncUtils.DeserializeDateTime(stringSplit[1]);
+            return new SavegameEntry(guid, timestamp);
+        }
     }
 
     /// <summary>
@@ -36,14 +49,10 @@ namespace SavegameSync
                 string[] lineSplit = line.Split('\t');
                 string gameName = lineSplit[0];
                 gameEntries[gameName] = new Queue<SavegameEntry>();
-                int index = 1;
-                while (index < lineSplit.Length)
+                for (int i = 1; i < lineSplit.Length; i++)
                 {
-                    Guid saveGuid = Guid.Parse(lineSplit[index]);
-                    index++;
-                    DateTime saveTimestamp = SavegameSyncUtils.DeserializeDateTime(lineSplit[index]);
-                    index++;
-                    gameEntries[gameName].Enqueue(new SavegameEntry(saveGuid, saveTimestamp));
+                    SavegameEntry entry = SavegameEntry.Deserialize(lineSplit[i]);
+                    gameEntries[gameName].Enqueue(entry);
                 }
             }
             streamReader.Close();
@@ -57,7 +66,7 @@ namespace SavegameSync
                 await streamWriter.WriteAsync(entry);
                 foreach (SavegameEntry save in gameEntries[entry])
                 {
-                    await streamWriter.WriteAsync($"\t{save.Guid.ToString()}\t{SavegameSyncUtils.SerializeDateTime(save.Timestamp)}");
+                    await streamWriter.WriteAsync($"\t{save.Serialize()}");
                 }
                 await streamWriter.WriteLineAsync();
             }
