@@ -6,14 +6,25 @@ using System.Threading.Tasks;
 
 namespace SavegameSync
 {
+    public struct SavegameEntry
+    {
+        public Guid Guid { get; private set; }
+        public DateTime Timestamp { get; private set; }
+
+        public SavegameEntry(Guid guid, DateTime timestamp)
+        {
+            Guid = guid;
+            Timestamp = timestamp;
+        }
+    }
+
     /// <summary>
-    /// Stores a queue of savegame entries for each game. Each savegame entry is
-    /// a (guid, timestamp) pair.
+    /// Stores a queue of savegame entries for each game, indexed by game name.
     /// </summary>
     public class SavegameList
     {
-        private Dictionary<string, Queue<Tuple<Guid, DateTime>>> gameEntries =
-            new Dictionary<string, Queue<Tuple<Guid, DateTime>>>();
+        private Dictionary<string, Queue<SavegameEntry>> gameEntries =
+            new Dictionary<string, Queue<SavegameEntry>>();
 
         public async Task ReadFromStream(Stream stream)
         {
@@ -24,7 +35,7 @@ namespace SavegameSync
                 string line = await streamReader.ReadLineAsync();
                 string[] lineSplit = line.Split('\t');
                 string gameName = lineSplit[0];
-                gameEntries[gameName] = new Queue<Tuple<Guid, DateTime>>();
+                gameEntries[gameName] = new Queue<SavegameEntry>();
                 int index = 1;
                 while (index < lineSplit.Length)
                 {
@@ -32,7 +43,7 @@ namespace SavegameSync
                     index++;
                     DateTime saveTimestamp = SavegameSyncUtils.DeserializeDateTime(lineSplit[index]);
                     index++;
-                    gameEntries[gameName].Enqueue(new Tuple<Guid, DateTime>(saveGuid, saveTimestamp));
+                    gameEntries[gameName].Enqueue(new SavegameEntry(saveGuid, saveTimestamp));
                 }
             }
             streamReader.Close();
@@ -44,9 +55,9 @@ namespace SavegameSync
             foreach (string entry in gameEntries.Keys)
             {
                 await streamWriter.WriteAsync(entry);
-                foreach (Tuple<Guid, DateTime> save in gameEntries[entry])
+                foreach (SavegameEntry save in gameEntries[entry])
                 {
-                    await streamWriter.WriteAsync($"\t{save.Item1.ToString()}\t{SavegameSyncUtils.SerializeDateTime(save.Item2)}");
+                    await streamWriter.WriteAsync($"\t{save.Guid.ToString()}\t{SavegameSyncUtils.SerializeDateTime(save.Timestamp)}");
                 }
                 await streamWriter.WriteLineAsync();
             }
@@ -57,22 +68,22 @@ namespace SavegameSync
         {
             if (!gameEntries.ContainsKey(gameName))
             {
-                gameEntries[gameName] = new Queue<Tuple<Guid, DateTime>>();
+                gameEntries[gameName] = new Queue<SavegameEntry>();
             }
             if (gameEntries[gameName].Count >= SavegameSyncEngine.SavesPerGame)
             {
                 gameEntries[gameName].Dequeue();
             }
-            gameEntries[gameName].Enqueue(new Tuple<Guid, DateTime>(saveGuid, saveTimestamp));
+            gameEntries[gameName].Enqueue(new SavegameEntry(saveGuid, saveTimestamp));
         }
 
-        public List<Tuple<Guid, DateTime>> ReadSaves(string gameName)
+        public List<SavegameEntry> ReadSaves(string gameName)
         {
             if (!gameEntries.ContainsKey(gameName))
             {
-                return new List<Tuple<Guid, DateTime>>();
+                return new List<SavegameEntry>();
             }
-            return new List<Tuple<Guid, DateTime>>(gameEntries[gameName]);
+            return new List<SavegameEntry>(gameEntries[gameName]);
         }
 
         public List<string> GetGames()
@@ -82,11 +93,11 @@ namespace SavegameSync
 
         public void DebugPrintSaves(string gameName)
         {
-            List<Tuple<Guid, DateTime>> saves = ReadSaves(gameName);
+            List<SavegameEntry> saves = ReadSaves(gameName);
             Debug.Write(gameName);
-            foreach (Tuple<Guid, DateTime> save in saves)
+            foreach (SavegameEntry save in saves)
             {
-                Debug.Write($" ({save.Item1},{save.Item2})");
+                Debug.Write($" ({save.Guid},{save.Timestamp})");
             }
             Debug.WriteLine("");
         }
