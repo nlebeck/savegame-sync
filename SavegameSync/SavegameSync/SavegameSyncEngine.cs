@@ -212,7 +212,7 @@ namespace SavegameSync
             await ReadSavegameList();
             savegameList.DebugPrintGames();
             savegameList.DebugPrintSaves("MOHAA");
-            //savegameList.AddSave("MOHAA", "23094sdlkj", "100102330");
+            //savegameList.AddSave("MOHAA", Guid.NewGuid(), DateTime.Now);
             await WriteSavegameList();
         }
 

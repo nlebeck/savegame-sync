@@ -12,8 +12,8 @@ namespace SavegameSync
     /// </summary>
     public class SavegameList
     {
-        private Dictionary<string, Queue<Tuple<string, string>>> gameEntries =
-            new Dictionary<string, Queue<Tuple<string, string>>>();
+        private Dictionary<string, Queue<Tuple<Guid, DateTime>>> gameEntries =
+            new Dictionary<string, Queue<Tuple<Guid, DateTime>>>();
 
         public async Task ReadFromStream(Stream stream)
         {
@@ -24,15 +24,15 @@ namespace SavegameSync
                 string line = await streamReader.ReadLineAsync();
                 string[] lineSplit = line.Split('\t');
                 string gameName = lineSplit[0];
-                gameEntries[gameName] = new Queue<Tuple<string, string>>();
+                gameEntries[gameName] = new Queue<Tuple<Guid, DateTime>>();
                 int index = 1;
                 while (index < lineSplit.Length)
                 {
-                    string saveGuid = lineSplit[index];
+                    Guid saveGuid = Guid.Parse(lineSplit[index]);
                     index++;
-                    string saveTimestamp = lineSplit[index];
+                    DateTime saveTimestamp = SavegameSyncUtils.DeserializeDateTime(lineSplit[index]);
                     index++;
-                    gameEntries[gameName].Enqueue(new Tuple<string, string>(saveGuid, saveTimestamp));
+                    gameEntries[gameName].Enqueue(new Tuple<Guid, DateTime>(saveGuid, saveTimestamp));
                 }
             }
             streamReader.Close();
@@ -44,35 +44,35 @@ namespace SavegameSync
             foreach (string entry in gameEntries.Keys)
             {
                 await streamWriter.WriteAsync(entry);
-                foreach (Tuple<string, string> save in gameEntries[entry])
+                foreach (Tuple<Guid, DateTime> save in gameEntries[entry])
                 {
-                    await streamWriter.WriteAsync($"\t{save.Item1}\t{save.Item2}");
+                    await streamWriter.WriteAsync($"\t{save.Item1.ToString()}\t{SavegameSyncUtils.SerializeDateTime(save.Item2)}");
                 }
                 await streamWriter.WriteLineAsync();
             }
             await streamWriter.FlushAsync();
         }
 
-        public void AddSave(string gameName, string saveGuid, string saveTimestamp)
+        public void AddSave(string gameName, Guid saveGuid, DateTime saveTimestamp)
         {
             if (!gameEntries.ContainsKey(gameName))
             {
-                gameEntries[gameName] = new Queue<Tuple<string, string>>();
+                gameEntries[gameName] = new Queue<Tuple<Guid, DateTime>>();
             }
             if (gameEntries[gameName].Count >= SavegameSyncEngine.SavesPerGame)
             {
                 gameEntries[gameName].Dequeue();
             }
-            gameEntries[gameName].Enqueue(new Tuple<string, string>(saveGuid, saveTimestamp));
+            gameEntries[gameName].Enqueue(new Tuple<Guid, DateTime>(saveGuid, saveTimestamp));
         }
 
-        public List<Tuple<string, string>> ReadSaves(string gameName)
+        public List<Tuple<Guid, DateTime>> ReadSaves(string gameName)
         {
             if (!gameEntries.ContainsKey(gameName))
             {
-                return new List<Tuple<string, string>>();
+                return new List<Tuple<Guid, DateTime>>();
             }
-            return new List<Tuple<string, string>>(gameEntries[gameName]);
+            return new List<Tuple<Guid, DateTime>>(gameEntries[gameName]);
         }
 
         public List<string> GetGames()
@@ -82,11 +82,11 @@ namespace SavegameSync
 
         public void DebugPrintSaves(string gameName)
         {
-            List<Tuple<string, string>> saves = ReadSaves(gameName);
+            List<Tuple<Guid, DateTime>> saves = ReadSaves(gameName);
             Debug.Write(gameName);
-            foreach (Tuple<string, string> save in saves)
+            foreach (Tuple<Guid, DateTime> save in saves)
             {
-                Debug.Write($" {save.Item1} {save.Item2}");
+                Debug.Write($" ({save.Item1},{save.Item2})");
             }
             Debug.WriteLine("");
         }
