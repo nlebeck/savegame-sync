@@ -253,29 +253,56 @@ namespace SavegameSync
             }
         }
 
-        public void DebugZipAndUploadSave()
+        public async Task DebugZipAndUploadSave()
         {
+            // Wipe Google Drive app folder
+            await DeleteAllFilesAsync();
+
+            // Copy save files from the game's install directory into a temp directory according
+            // to the spec
             string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
             SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
             string destDir = "C:\\Users\\niell\\Git\\testmohaa";
             CopySaveFiles(mohaaSpec, installDir, destDir);
 
+            // Find the last write time of the save
             DateTime latestFileWriteTime = FileUtils.GetLatestFileWriteTime(destDir);
             Console.WriteLine("Latest write time: " + latestFileWriteTime);
 
+            // Assign the save a guid and make it into a zip file
             Guid saveGuid = Guid.NewGuid();
             Console.WriteLine("Guid: " + saveGuid);
             string zipFile = "C:\\Users\\niell\\Git\\" + saveGuid + ".zip";
             FileUtils.DeleteIfExists(zipFile);
             ZipFile.CreateFromDirectory(destDir, zipFile);
 
-            //TODO: upload save
+            // Upload save
+            string remoteFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
+            string fileId = await CreateFileAsync(remoteFileName);
+            FileStream fileStream = File.OpenRead(zipFile);
+            await UploadFile(fileId, fileStream);
 
-            //TODO: download latest version of SavegameList
+            // Download latest version of SavegameList
+            await ReadSavegameList();
 
-            //TODO: add save to SavegameList
+            // Add save to SavegameList
+            savegameList.AddSave("Medal of Honor Allied Assault War Chest", saveGuid, latestFileWriteTime);
 
-            //TODO: upload SavegameList
+            // Upload SavegameList
+            await WriteSavegameList();
+
+            // Print data from the local copy of the savegameList
+            savegameList.DebugPrintGameNames();
+            savegameList.DebugPrintSaves("Medal of Honor Allied Assault War Chest");
+
+            // Print all files in the Google Drive app folder
+            Console.WriteLine("Listing all files: ");
+            var files = await GetAllFilesAsync();
+            for (int i = 0; i < files.Count; i++)
+            {
+                Console.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
+            }
+            Console.WriteLine("Done listing all files");
         }
 
         public async Task DebugGoogleDriveFunctions()

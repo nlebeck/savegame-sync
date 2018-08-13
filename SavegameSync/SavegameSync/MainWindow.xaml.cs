@@ -32,9 +32,9 @@ namespace SavegameSync
 
             loginStatusTextBlock.Text = "";
 
-            await savegameSync.DebugCheckSavegameListFile();
+            //await savegameSync.DebugCheckSavegameListFile();
             await savegameSync.DebugCheckLocalGameListFile();
-            savegameSync.DebugZipAndUploadSave();
+            await savegameSync.DebugZipAndUploadSave();
             Console.WriteLine("Done debugging!");
 
             UpdateLocalGameList();
