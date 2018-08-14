@@ -262,7 +262,7 @@ namespace SavegameSync
             // to the spec
             string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
             SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
-            string destDir = "C:\\Users\\niell\\Git\\testmohaa";
+            string destDir = @"C:\Users\niell\Git\savegame-sync\tempMohaaUpload\testmohaa";
             CopySaveFilesFromInstallDir(mohaaSpec, installDir, destDir);
 
             // Find the last write time of the save
@@ -272,7 +272,7 @@ namespace SavegameSync
             // Assign the save a guid and make it into a zip file
             Guid saveGuid = Guid.NewGuid();
             Console.WriteLine("Guid: " + saveGuid);
-            string zipFile = "C:\\Users\\niell\\Git\\" + saveGuid + ".zip";
+            string zipFile = @"C:\Users\niell\Git\savegame-sync\tempMohaaUpload\" + saveGuid + ".zip";
             FileUtils.DeleteIfExists(zipFile);
             ZipFile.CreateFromDirectory(destDir, zipFile);
 
@@ -321,14 +321,14 @@ namespace SavegameSync
             var files = await SearchFileByNameAsync(saveFileName);
             Debug.Assert(files.Count == 1);
             string saveFileId = files[0].Id;
-            string zipFilePath = @"C:\Users\niell\Git\temp\" + saveFileName;
+            string zipFilePath = @"C:\Users\niell\Git\savegame-sync\tempMohaaDownload\" + saveFileName;
             using (FileStream fileStream = File.OpenWrite(zipFilePath))
             {
                 await DownloadFile(saveFileId, fileStream);
             }
 
             // Unzip zipped save
-            string tempSaveDir = @"C:\Users\niell\Git\temp\testmohaaUnzip";
+            string tempSaveDir = @"C:\Users\niell\Git\savegame-sync\tempMohaaDownload\testmohaa";
             FileUtils.DeleteIfExists(tempSaveDir);
             ZipFile.ExtractToDirectory(zipFilePath, tempSaveDir);
 
@@ -395,6 +395,15 @@ namespace SavegameSync
             }
         }
 
+        /// <summary>
+        /// Copy the files and directories named in a SaveSpec from a source directory into a
+        /// game's install directory, first deleting the existing copies of those items from the
+        /// install directory.
+        /// </summary>
+        /// <remarks>
+        /// Note that if an item named in the SaveSpec is present in the install directory but not
+        /// in the source directory, this method will delete that item from the install directory.
+        /// </remarks>
         private void CopySaveFilesIntoInstallDir(SaveSpec saveSpec, string sourceDir, string installDir)
         {
             foreach (string subPath in saveSpec.SavePaths)
