@@ -305,6 +305,30 @@ namespace SavegameSync
             Console.WriteLine("Done listing all files");
         }
 
+        public async Task DebugDownloadAndUnzipSave()
+        {
+            // Read file name from SavegameList
+            Guid saveGuid = savegameList.ReadSaves("Medal of Honor Allied Assault War Chest")[0].Guid;
+            string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
+            Console.WriteLine("Downloading save file " + saveFileName);
+
+            // Download zipped save from Google Drive
+            var files = await SearchFileByNameAsync(saveFileName);
+            Debug.Assert(files.Count == 1);
+            string saveFileId = files[0].Id;
+            string zipFilePath = @"C:\Users\niell\Git\temp\" + saveFileName;
+            using (FileStream fileStream = File.OpenWrite(zipFilePath))
+            {
+                await DownloadFile(saveFileId, fileStream);
+            }
+
+            // Unzip zipped save
+            string destDir = @"C:\Users\niell\Git\temp\testmohaaUnzip";
+            ZipFile.ExtractToDirectory(zipFilePath, destDir);
+
+            // TODO: Copy unzipped files/directories into game install directory
+        }
+
         public async Task DebugGoogleDriveFunctions()
         {
             List<string> dummyFileIds = new List<string>();

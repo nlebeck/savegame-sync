@@ -35,6 +35,7 @@ namespace SavegameSync
             //await savegameSync.DebugCheckSavegameListFile();
             await savegameSync.DebugCheckLocalGameListFile();
             await savegameSync.DebugZipAndUploadSave();
+            await savegameSync.DebugDownloadAndUnzipSave();
             Console.WriteLine("Done debugging!");
 
             UpdateLocalGameList();
