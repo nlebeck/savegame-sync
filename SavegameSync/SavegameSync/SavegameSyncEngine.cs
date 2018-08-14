@@ -263,7 +263,7 @@ namespace SavegameSync
             string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
             SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
             string destDir = "C:\\Users\\niell\\Git\\testmohaa";
-            CopySaveFiles(mohaaSpec, installDir, destDir);
+            CopySaveFilesFromInstallDir(mohaaSpec, installDir, destDir);
 
             // Find the last write time of the save
             DateTime latestFileWriteTime = FileUtils.GetLatestFileWriteTime(destDir);
@@ -279,8 +279,10 @@ namespace SavegameSync
             // Upload save
             string remoteFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
             string fileId = await CreateFileAsync(remoteFileName);
-            FileStream fileStream = File.OpenRead(zipFile);
-            await UploadFile(fileId, fileStream);
+            using (FileStream fileStream = File.OpenRead(zipFile))
+            {
+                await UploadFile(fileId, fileStream);
+            }
 
             // Download latest version of SavegameList
             await ReadSavegameList();
@@ -307,6 +309,9 @@ namespace SavegameSync
 
         public async Task DebugDownloadAndUnzipSave()
         {
+            // Download latest version of SavegameList
+            await ReadSavegameList();
+
             // Read file name from SavegameList
             Guid saveGuid = savegameList.ReadSaves("Medal of Honor Allied Assault War Chest")[0].Guid;
             string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
@@ -323,10 +328,14 @@ namespace SavegameSync
             }
 
             // Unzip zipped save
-            string destDir = @"C:\Users\niell\Git\temp\testmohaaUnzip";
-            ZipFile.ExtractToDirectory(zipFilePath, destDir);
+            string tempSaveDir = @"C:\Users\niell\Git\temp\testmohaaUnzip";
+            FileUtils.DeleteIfExists(tempSaveDir);
+            ZipFile.ExtractToDirectory(zipFilePath, tempSaveDir);
 
             // TODO: Copy unzipped files/directories into game install directory
+            string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
+            SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
+            CopySaveFilesIntoInstallDir(mohaaSpec, tempSaveDir, installDir);
         }
 
         public async Task DebugGoogleDriveFunctions()
@@ -361,13 +370,13 @@ namespace SavegameSync
             Console.WriteLine("Done printing all files for the second time");
         }
 
-        private void CopySaveFiles(SaveSpec saveSpec, string rootDir, string destDir)
+        private void CopySaveFilesFromInstallDir(SaveSpec saveSpec, string installDir, string destDir)
         {
             FileUtils.DeleteIfExists(destDir);
             Directory.CreateDirectory(destDir);
             foreach (string subPath in saveSpec.SavePaths)
             {
-                string originalPath = System.IO.Path.Combine(rootDir, subPath);
+                string originalPath = System.IO.Path.Combine(installDir, subPath);
                 string destPath = System.IO.Path.Combine(destDir, subPath);
                 if (Directory.Exists(originalPath))
                 {
@@ -379,7 +388,33 @@ namespace SavegameSync
                 }
                 else
                 {
-                    Console.WriteLine("Skipping missing subpath " + subPath);
+                    Console.WriteLine("Skipping missing subpath " + subPath
+                        + " while copying save files for " + saveSpec.GameName
+                        + " out of install dir");
+                }
+            }
+        }
+
+        private void CopySaveFilesIntoInstallDir(SaveSpec saveSpec, string sourceDir, string installDir)
+        {
+            foreach (string subPath in saveSpec.SavePaths)
+            {
+                string sourcePath = Path.Combine(sourceDir, subPath);
+                string destPath = Path.Combine(installDir, subPath);
+                FileUtils.DeleteIfExists(destPath);
+                if (Directory.Exists(sourcePath))
+                {
+                    FileUtils.CopyDirectory(sourcePath, destPath);
+                }
+                else if (File.Exists(sourcePath))
+                {
+                    FileUtils.CopyDirectory(sourcePath, destPath);
+                }
+                else
+                {
+                    Console.WriteLine("Skipping missing subpath " + subPath
+                        + " while copying save files for " + saveSpec.GameName
+                        + " into install dir");
                 }
             }
         }
