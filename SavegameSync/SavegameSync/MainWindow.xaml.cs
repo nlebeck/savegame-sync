@@ -27,12 +27,13 @@ namespace SavegameSync
             cloudGameListBox.Items.Add("Loading...");
             savegameListBox.Items.Add("Loading...");
 
+            StartOperation("Logging in...");
             savegameSync = SavegameSyncEngine.GetInstance();
             await savegameSync.Init();
             await savegameSync.Login();
+            FinishOperation();
 
-            loginStatusTextBlock.Text = "";
-
+            StartOperation("Updating game lists...");
             //await savegameSync.DebugCheckSavegameListFile();
             await savegameSync.DebugCheckLocalGameListFile();
             await savegameSync.DebugZipAndUploadSave();
@@ -41,6 +42,7 @@ namespace SavegameSync
 
             UpdateLocalGameList();
             UpdateCloudGameList();
+            FinishOperation();
         }
 
         private void UpdateLocalGameList()
@@ -133,8 +135,32 @@ namespace SavegameSync
                 return;
             }
             string gameName = selectedGame.ToString();
+            StartOperation("Uploading save for " + gameName + "...");
             await savegameSync.ZipAndUploadSave(gameName);
             await UpdateSavegameList(gameName);
+            FinishOperation();
+        }
+
+        private void StartOperation(string message)
+        {
+            statusTextBlock.Text = message;
+            copyToCloudButton.IsEnabled = false;
+            copyFromCloudButton.IsEnabled = false;
+            addGameButton.IsEnabled = false;
+            localGameListBox.IsEnabled = false;
+            cloudGameListBox.IsEnabled = false;
+            savegameListBox.IsEnabled = false;
+        }
+
+        private void FinishOperation()
+        {
+            statusTextBlock.Text = "Ready.";
+            copyToCloudButton.IsEnabled = true;
+            copyFromCloudButton.IsEnabled = true;
+            addGameButton.IsEnabled = true;
+            localGameListBox.IsEnabled = true;
+            cloudGameListBox.IsEnabled = true;
+            savegameListBox.IsEnabled = true;
         }
     }
 }
