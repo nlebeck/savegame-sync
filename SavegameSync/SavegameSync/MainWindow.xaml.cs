@@ -25,6 +25,7 @@ namespace SavegameSync
 
             localGameListBox.Items.Add("Loading...");
             cloudGameListBox.Items.Add("Loading...");
+            savegameListBox.Items.Add("Loading...");
 
             savegameSync = SavegameSyncEngine.GetInstance();
             await savegameSync.Init();
@@ -96,6 +97,25 @@ namespace SavegameSync
             {
                 await savegameSync.AddLocalGame(gameName, path);
                 UpdateLocalGameList();
+            }
+        }
+
+        private async void localGameListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            Debug.Assert(e.AddedItems.Count == 1);
+            string gameName = e.AddedItems[0].ToString();
+            savegameListBox.Items.Clear();
+            savegameListBox.Items.Add("Loading...");
+            currentGameTextBlock.Text = gameName;
+
+            List<SavegameEntry> saves = await savegameSync.ReadSaves(gameName);
+            savegameListBox.Items.Clear();
+            for (int i = saves.Count - 1; i >= 0; i--) {
+                savegameListBox.Items.Add(saves[i].Timestamp);
+            }
+            if (saves.Count == 0)
+            {
+                savegameListBox.Items.Add("No saves found.");
             }
         }
     }

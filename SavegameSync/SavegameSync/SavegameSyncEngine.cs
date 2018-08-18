@@ -242,6 +242,12 @@ namespace SavegameSync
             await WriteLocalGameList();
         }
 
+        public async Task<List<SavegameEntry>> ReadSaves(string gameName)
+        {
+            await ReadSavegameList();
+            return savegameList.ReadSaves(gameName);
+        }
+
         public async Task DebugCheckLocalGameListFile()
         {
             await ReadLocalGameList();
