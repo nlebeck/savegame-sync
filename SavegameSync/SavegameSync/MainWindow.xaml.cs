@@ -53,6 +53,24 @@ namespace SavegameSync
             }
         }
 
+        private async Task UpdateSavegameList(string gameName)
+        {
+            savegameListBox.Items.Clear();
+            savegameListBox.Items.Add("Loading...");
+            currentGameTextBlock.Text = gameName;
+
+            List<SavegameEntry> saves = await savegameSync.ReadSaves(gameName);
+            savegameListBox.Items.Clear();
+            for (int i = saves.Count - 1; i >= 0; i--)
+            {
+                savegameListBox.Items.Add(saves[i].Timestamp);
+            }
+            if (saves.Count == 0)
+            {
+                savegameListBox.Items.Add("No saves found.");
+            }
+        }
+
         private void UpdateCloudGameList()
         {
             cloudGameListBox.Items.Clear();
@@ -104,19 +122,19 @@ namespace SavegameSync
         {
             Debug.Assert(e.AddedItems.Count == 1);
             string gameName = e.AddedItems[0].ToString();
-            savegameListBox.Items.Clear();
-            savegameListBox.Items.Add("Loading...");
-            currentGameTextBlock.Text = gameName;
+            await UpdateSavegameList(gameName);
+        }
 
-            List<SavegameEntry> saves = await savegameSync.ReadSaves(gameName);
-            savegameListBox.Items.Clear();
-            for (int i = saves.Count - 1; i >= 0; i--) {
-                savegameListBox.Items.Add(saves[i].Timestamp);
-            }
-            if (saves.Count == 0)
+        private async void copyToCloudButton_Click(object sender, RoutedEventArgs e)
+        {
+            object selectedGame = localGameListBox.SelectedItem;
+            if (selectedGame == null)
             {
-                savegameListBox.Items.Add("No saves found.");
+                return;
             }
+            string gameName = selectedGame.ToString();
+            await savegameSync.ZipAndUploadSave(gameName);
+            await UpdateSavegameList(gameName);
         }
     }
 }

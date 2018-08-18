@@ -8,8 +8,8 @@
         Title="MainWindow" Height="480" Width="840">
     <Grid>
         <ListBox x:Name="localGameListBox" HorizontalAlignment="Left" Height="146" Margin="36,74,0,0" VerticalAlignment="Top" Width="192" SelectionChanged="localGameListBox_SelectionChanged"/>
-        <Button x:Name="copyToCloudButton" Content="Copy to cloud" HorizontalAlignment="Left" Height="23" Margin="35,225,0,0" VerticalAlignment="Top" Width="87"/>
-        <Button x:Name="copyFromCloudButton" Content="Copy from cloud" HorizontalAlignment="Left" Height="23" Margin="127,225,0,0" VerticalAlignment="Top" Width="101"/>
+        <Button x:Name="copyToCloudButton" Content="Upload local save to cloud" HorizontalAlignment="Left" Height="23" Margin="35,225,0,0" VerticalAlignment="Top" Width="147" Click="copyToCloudButton_Click"/>
+        <Button x:Name="copyFromCloudButton" Content="Copy selected save from cloud" HorizontalAlignment="Left" Height="23" Margin="35,253,0,0" VerticalAlignment="Top" Width="172"/>
         <Button x:Name="addGameButton" Content="Add game" HorizontalAlignment="Left" Height="23" Margin="163,46,0,0" VerticalAlignment="Top" Width="65" Click="addGameButton_Click"/>
         <TextBlock x:Name="loginStatusTextBlock" HorizontalAlignment="Left" Height="17" Margin="10,10,0,0" TextWrapping="Wrap" Text="Logging in..." VerticalAlignment="Top" Width="101"/>
         <ListBox x:Name="cloudGameListBox" HorizontalAlignment="Left" Height="146" Margin="290,74,0,0" VerticalAlignment="Top" Width="192"/>

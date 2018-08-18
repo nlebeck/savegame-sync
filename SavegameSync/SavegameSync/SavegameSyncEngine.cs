@@ -259,26 +259,26 @@ namespace SavegameSync
             }
         }
 
-        public async Task DebugZipAndUploadSave()
+        public async Task ZipAndUploadSave(string gameName)
         {
-            // Wipe Google Drive app folder
-            await DeleteAllFilesAsync();
-
             // Copy save files from the game's install directory into a temp directory according
             // to the spec
-            string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
-            SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
-            string destDir = @"C:\Users\niell\Git\savegame-sync\tempMohaaUpload\testmohaa";
-            CopySaveFilesFromInstallDir(mohaaSpec, installDir, destDir);
+            string installDir = localGameList.GetInstallDir(gameName);
+            SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(gameName);
+            string destDir = @"C:\Users\niell\Git\savegame-sync\tempUpload\temp";
+            FileUtils.DeleteIfExists(destDir);
+            Directory.CreateDirectory(destDir);
+            CopySaveFilesFromInstallDir(saveSpec, installDir, destDir);
+            Debug.WriteLine("Dirs: " + installDir + " " + destDir);
 
             // Find the last write time of the save
             DateTime latestFileWriteTime = FileUtils.GetLatestFileWriteTime(destDir);
-            Console.WriteLine("Latest write time: " + latestFileWriteTime);
+            Debug.WriteLine("Latest write time: " + latestFileWriteTime);
 
             // Assign the save a guid and make it into a zip file
             Guid saveGuid = Guid.NewGuid();
-            Console.WriteLine("Guid: " + saveGuid);
-            string zipFile = @"C:\Users\niell\Git\savegame-sync\tempMohaaUpload\" + saveGuid + ".zip";
+            Debug.WriteLine("Guid: " + saveGuid);
+            string zipFile = @"C:\Users\niell\Git\savegame-sync\tempUpload\" + saveGuid + ".zip";
             FileUtils.DeleteIfExists(zipFile);
             ZipFile.CreateFromDirectory(destDir, zipFile);
 
@@ -294,10 +294,18 @@ namespace SavegameSync
             await ReadSavegameList();
 
             // Add save to SavegameList
-            savegameList.AddSave("Medal of Honor Allied Assault War Chest", saveGuid, latestFileWriteTime);
+            savegameList.AddSave(gameName, saveGuid, latestFileWriteTime);
 
             // Upload SavegameList
             await WriteSavegameList();
+        }
+
+        public async Task DebugZipAndUploadSave()
+        {
+            // Wipe Google Drive app folder
+            await DeleteAllFilesAsync();
+
+            await ZipAndUploadSave("Medal of Honor Allied Assault War Chest");
 
             // Print data from the local copy of the savegameList
             savegameList.DebugPrintGameNames();
