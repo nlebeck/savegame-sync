@@ -19,6 +19,8 @@
         <TextBlock x:Name="currentGameTextBlock" HorizontalAlignment="Left" Margin="547,74,0,0" TextWrapping="Wrap" Text="(Choose a game)" VerticalAlignment="Top"/>
         <TextBlock x:Name="statusLabelTextBlock" HorizontalAlignment="Left" Margin="36,299,0,0" TextWrapping="Wrap" Text="Status:" VerticalAlignment="Top"/>
         <TextBlock x:Name="statusTextBlock" HorizontalAlignment="Left" Margin="76,299,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="406"/>
+        <Button x:Name="deleteCloudSaveButton" Content="Delete cloud save" HorizontalAlignment="Left" Margin="547,320,0,0" VerticalAlignment="Top" Width="105" Click="deleteCloudSaveButton_Click"/>
+        <Button x:Name="debugButton" Content="Debug" HorizontalAlignment="Left" Margin="35,379,0,0" VerticalAlignment="Top" Width="75" Click="debugButton_Click"/>
 
     </Grid>
 </Window>

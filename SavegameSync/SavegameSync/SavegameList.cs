@@ -36,8 +36,8 @@ namespace SavegameSync
     /// </summary>
     public class SavegameList
     {
-        private Dictionary<string, Queue<SavegameEntry>> gameEntries =
-            new Dictionary<string, Queue<SavegameEntry>>();
+        private Dictionary<string, List<SavegameEntry>> gameEntries =
+            new Dictionary<string, List<SavegameEntry>>();
 
         public async Task ReadFromStream(Stream stream)
         {
@@ -48,11 +48,11 @@ namespace SavegameSync
                 string line = await streamReader.ReadLineAsync();
                 string[] lineSplit = line.Split('\t');
                 string gameName = lineSplit[0];
-                gameEntries[gameName] = new Queue<SavegameEntry>();
+                gameEntries[gameName] = new List<SavegameEntry>();
                 for (int i = 1; i < lineSplit.Length; i++)
                 {
                     SavegameEntry entry = SavegameEntry.Deserialize(lineSplit[i]);
-                    gameEntries[gameName].Enqueue(entry);
+                    gameEntries[gameName].Add(entry);
                 }
             }
             streamReader.Close();
@@ -77,9 +77,30 @@ namespace SavegameSync
         {
             if (!gameEntries.ContainsKey(gameName))
             {
-                gameEntries[gameName] = new Queue<SavegameEntry>();
+                gameEntries[gameName] = new List<SavegameEntry>();
             }
-            gameEntries[gameName].Enqueue(new SavegameEntry(saveGuid, saveTimestamp));
+            gameEntries[gameName].Add(new SavegameEntry(saveGuid, saveTimestamp));
+        }
+
+        public void DeleteSave(string gameName, Guid saveGuid)
+        {
+            int indexToRemove = -1;
+            for (int i = 0; i < gameEntries[gameName].Count; i++)
+            {
+                if (gameEntries[gameName][i].Guid == saveGuid)
+                {
+                    indexToRemove = i;
+                }
+            }
+            Debug.Assert(indexToRemove >= 0);
+            gameEntries[gameName].RemoveAt(indexToRemove);
+        }
+
+        public void DeleteSave(string gameName, int saveIndex)
+        {
+            Debug.Assert(saveIndex >= 0);
+            Debug.Assert(saveIndex < gameEntries[gameName].Count);
+            gameEntries[gameName].RemoveAt(saveIndex);
         }
 
         public List<SavegameEntry> ReadSaves(string gameName)

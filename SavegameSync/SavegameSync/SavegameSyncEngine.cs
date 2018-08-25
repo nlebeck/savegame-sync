@@ -209,8 +209,7 @@ namespace SavegameSync
         {
             await ReadSavegameList();
             savegameList.DebugPrintGameNames();
-            savegameList.DebugPrintSaves("MOHAA");
-            //savegameList.AddSave("MOHAA", Guid.NewGuid(), DateTime.Now);
+            savegameList.DebugPrintSaves("Medal of Honor Allied Assault War Chest");
             await WriteSavegameList();
         }
 
@@ -333,6 +332,43 @@ namespace SavegameSync
             CopySaveFilesIntoInstallDir(saveSpec, tempSaveDir, installDir);
         }
 
+        public async Task DeleteSave(string gameName, int saveIndex)
+        {
+            // Download latest version of SavegameList
+            await ReadSavegameList();
+
+            // Get guid of zipped save file to use later
+            List<SavegameEntry> saves = savegameList.ReadSaves(gameName);
+            SavegameEntry save = saves[saveIndex];
+            Guid saveGuid = save.Guid;
+            Debug.WriteLine("Deleting save file with guid " + saveGuid + ", index " + saveIndex + ", and timestamp " + save.Timestamp);
+
+            // Delete save from SavegameList
+            savegameList.DeleteSave(gameName, saveIndex);
+
+            // Upload SavegameList
+            await WriteSavegameList();
+
+            // Delete zipped save file
+            string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
+            var files = await SearchFileByNameAsync(saveFileName);
+            Debug.Assert(files.Count == 1);
+            string saveFileId = files[0].Id;
+            await DeleteFileAsync(saveFileId);
+        }
+
+        public async Task DebugPrintAllFiles()
+        {
+            // Print all files in the Google Drive app folder
+            Console.WriteLine("Listing all files: ");
+            var files = await GetAllFilesAsync();
+            for (int i = 0; i < files.Count; i++)
+            {
+                Console.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
+            }
+            Console.WriteLine("Done listing all files");
+        }
+
         public async Task DebugZipAndUploadSave()
         {
             // Wipe Google Drive app folder
@@ -344,14 +380,7 @@ namespace SavegameSync
             savegameList.DebugPrintGameNames();
             savegameList.DebugPrintSaves("Medal of Honor Allied Assault War Chest");
 
-            // Print all files in the Google Drive app folder
-            Console.WriteLine("Listing all files: ");
-            var files = await GetAllFilesAsync();
-            for (int i = 0; i < files.Count; i++)
-            {
-                Console.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
-            }
-            Console.WriteLine("Done listing all files");
+            await DebugPrintAllFiles();
         }
 
         public async Task DebugDownloadAndUnzipSave()
