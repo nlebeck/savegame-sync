@@ -236,6 +236,11 @@ namespace SavegameSync
             return localGameList.GetGameNames();
         }
 
+        public string GetLocalInstallDir(string gameName)
+        {
+            return localGameList.GetInstallDir(gameName);
+        }
+
         public async Task AddLocalGame(string gameName, string installDir)
         {
             localGameList.AddGame(gameName, installDir);
@@ -277,7 +282,7 @@ namespace SavegameSync
             Debug.WriteLine("Dirs: " + installDir + " " + destDir);
 
             // Find the last write time of the save
-            DateTime latestFileWriteTime = FileUtils.GetLatestFileWriteTime(destDir);
+            DateTime latestFileWriteTime = GetLocalSaveTimestamp(saveSpec, installDir);
             Debug.WriteLine("Latest write time: " + latestFileWriteTime);
 
             // Assign the save a guid and make it into a zip file
@@ -451,6 +456,21 @@ namespace SavegameSync
                         + " out of install dir");
                 }
             }
+        }
+
+        public DateTime GetLocalSaveTimestamp(SaveSpec saveSpec, string installDir)
+        {
+            DateTime timestamp = new DateTime(0);
+            foreach (string subPath in saveSpec.SavePaths)
+            {
+                string fullSubPath = Path.Combine(installDir, subPath);
+                DateTime subPathTimestamp = FileUtils.GetLatestFileWriteTime(fullSubPath);
+                if (subPathTimestamp > timestamp)
+                {
+                    timestamp = subPathTimestamp;
+                }
+            }
+            return timestamp;
         }
 
         /// <summary>

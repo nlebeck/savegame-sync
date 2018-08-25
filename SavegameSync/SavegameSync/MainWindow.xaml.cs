@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
@@ -125,7 +126,34 @@ namespace SavegameSync
         {
             Debug.Assert(e.AddedItems.Count == 1);
             string gameName = e.AddedItems[0].ToString();
+
             await UpdateSavegameList(gameName);
+            UpdateLocalSavegameTimestampDisplay(gameName);
+        }
+
+        private void UpdateLocalSavegameTimestampDisplay(string selectedGameName)
+        {
+            string message = null;
+            string installDir = savegameSync.GetLocalInstallDir(selectedGameName);
+            SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(selectedGameName);
+            if (installDir == null)
+            {
+                message = "Error: game not in local game list";
+            }
+            else if (saveSpec == null)
+            {
+                message = "Error: save spec not found";
+            }
+            else if (!Directory.Exists(installDir))
+            {
+                message = "Error: install dir does not exist";
+            }
+            else
+            {
+                DateTime timestamp = savegameSync.GetLocalSaveTimestamp(saveSpec, installDir);
+                message = timestamp.ToString();
+            }
+            localSaveTimestampTextBlock.Text = message;
         }
 
         private async void copyToCloudButton_Click(object sender, RoutedEventArgs e)
@@ -182,6 +210,7 @@ namespace SavegameSync
 
             StartOperation("Downloading save for " + gameName + "...");
             await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
+            UpdateLocalSavegameTimestampDisplay(gameName);
             FinishOperation();
         }
 

@@ -15,12 +15,14 @@
         <TextBlock x:Name="cloudGameTextBlock" HorizontalAlignment="Left" Height="20" Margin="290,49,0,0" TextWrapping="Wrap" Text="Games in cloud" VerticalAlignment="Top" Width="82"/>
         <TextBlock x:Name="localGameTextBlock" HorizontalAlignment="Left" Height="20" Margin="36,49,0,0" TextWrapping="Wrap" Text="Local games" VerticalAlignment="Top" Width="82"/>
         <ListBox x:Name="savegameListBox" HorizontalAlignment="Left" Height="213" Margin="547,102,0,0" VerticalAlignment="Top" Width="200"/>
-        <TextBlock x:Name="savegameTextBlock" HorizontalAlignment="Left" Margin="547,49,0,0" TextWrapping="Wrap" Text="Savegames for: " VerticalAlignment="Top"/>
+        <TextBlock x:Name="savegameTextBlock" HorizontalAlignment="Left" Margin="547,49,0,0" TextWrapping="Wrap" Text="Cloud savegames for: " VerticalAlignment="Top"/>
         <TextBlock x:Name="currentGameTextBlock" HorizontalAlignment="Left" Margin="547,74,0,0" TextWrapping="Wrap" Text="(Choose a game)" VerticalAlignment="Top"/>
-        <TextBlock x:Name="statusLabelTextBlock" HorizontalAlignment="Left" Margin="36,299,0,0" TextWrapping="Wrap" Text="Status:" VerticalAlignment="Top"/>
-        <TextBlock x:Name="statusTextBlock" HorizontalAlignment="Left" Margin="76,299,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="406"/>
+        <TextBlock x:Name="statusLabelTextBlock" HorizontalAlignment="Left" Margin="36,333,0,0" TextWrapping="Wrap" Text="Status:" VerticalAlignment="Top"/>
+        <TextBlock x:Name="statusTextBlock" HorizontalAlignment="Left" Margin="76,333,0,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="406"/>
         <Button x:Name="deleteCloudSaveButton" Content="Delete cloud save" HorizontalAlignment="Left" Margin="547,320,0,0" VerticalAlignment="Top" Width="105" Click="deleteCloudSaveButton_Click"/>
         <Button x:Name="debugButton" Content="Debug" HorizontalAlignment="Left" Margin="35,379,0,0" VerticalAlignment="Top" Width="75" Click="debugButton_Click"/>
+        <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="35,299,0,0" TextWrapping="Wrap" Text="Timestamp of local save files for selected game:" VerticalAlignment="Top" Width="259"/>
+        <TextBlock x:Name="localSaveTimestampTextBlock" HorizontalAlignment="Left" Margin="299,299,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="243"/>
 
     </Grid>
 </Window>
