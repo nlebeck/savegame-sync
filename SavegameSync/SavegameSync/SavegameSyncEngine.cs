@@ -205,11 +205,14 @@ namespace SavegameSync
             await updateMediaUpload.UploadAsync();
         }
 
-        public async Task DebugCheckSavegameListFile()
+        public async Task DebugPrintSavegameListFile()
         {
             await ReadSavegameList();
             savegameList.DebugPrintGameNames();
-            savegameList.DebugPrintSaves("Medal of Honor Allied Assault War Chest");
+            foreach (string game in savegameList.GetGames())
+            {
+                savegameList.DebugPrintSaves(game);
+            }
             await WriteSavegameList();
         }
 
@@ -245,15 +248,20 @@ namespace SavegameSync
             return savegameList.ReadSaves(gameName);
         }
 
-        public async Task DebugCheckLocalGameListFile()
+        public async Task DebugPrintLocalGameListFile()
         {
             await ReadLocalGameList();
             localGameList.DebugPrintGames();
+        }
+
+        public async Task DebugAddNonexistentLocalGame()
+        {
+            await ReadLocalGameList();
             if (!localGameList.ContainsGame("MadeUpGame"))
             {
                 await AddLocalGame("MadeUpGame", "C:\\Games\\MadeUpGame");
-
             }
+            await WriteLocalGameList();
         }
 
         public async Task ZipAndUploadSave(string gameName)

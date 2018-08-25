@@ -61,10 +61,10 @@ namespace SavegameSync
 
         public void DebugPrintGames()
         {
-            Debug.Write("Installed games: ");
+            Debug.Write("LocalGameList games: ");
             foreach (string gameName in gameInstallDirs.Keys)
             {
-                Debug.Write($" {gameName} {gameInstallDirs[gameName]}");
+                Debug.Write($" {gameName}, {gameInstallDirs[gameName]};");
             }
             Debug.WriteLine("");
         }

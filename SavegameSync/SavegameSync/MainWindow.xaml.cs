@@ -34,11 +34,6 @@ namespace SavegameSync
             FinishOperation();
 
             StartOperation("Updating game lists...");
-            await savegameSync.DebugCheckLocalGameListFile();
-            //await savegameSync.DebugZipAndUploadSave();
-            //await savegameSync.DebugDownloadAndUnzipSave();
-            Console.WriteLine("Done debugging!");
-
             UpdateLocalGameList();
             UpdateCloudGameList();
             FinishOperation();
@@ -215,7 +210,9 @@ namespace SavegameSync
         private async void debugButton_Click(object sender, RoutedEventArgs e)
         {
             StartOperation("Doing debugging stuff...");
-            await savegameSync.DebugCheckSavegameListFile();
+            await savegameSync.DebugPrintLocalGameListFile();
+            //await savegameSync.DebugAddNonexistentLocalGame();
+            await savegameSync.DebugPrintSavegameListFile();
             await savegameSync.DebugPrintAllFiles();
             FinishOperation();
         }

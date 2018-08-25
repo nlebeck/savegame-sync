@@ -130,10 +130,10 @@ namespace SavegameSync
 
         public void DebugPrintGameNames()
         {
-            Debug.Write("Games:");
+            Debug.Write("SavegameList games:");
             foreach (string gameName in GetGames())
             {
-                Debug.Write($" {gameName}");
+                Debug.Write($" {gameName};");
             }
             Debug.WriteLine("");
         }
