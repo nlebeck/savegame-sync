@@ -79,10 +79,6 @@ namespace SavegameSync
             {
                 gameEntries[gameName] = new Queue<SavegameEntry>();
             }
-            if (gameEntries[gameName].Count >= SavegameSyncEngine.SavesPerGame)
-            {
-                gameEntries[gameName].Dequeue();
-            }
             gameEntries[gameName].Enqueue(new SavegameEntry(saveGuid, saveTimestamp));
         }
 

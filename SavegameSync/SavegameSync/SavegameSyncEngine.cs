@@ -17,8 +17,6 @@ namespace SavegameSync
     /// </summary>
     public class SavegameSyncEngine
     {
-        public const int SavesPerGame = 5;
-
         private const string ApplicationName = "Savegame Sync";
         private const string SavegameListFileName = "savegame-list.txt";
         private const string LocalGameListFileName = "local-game-list.txt";
