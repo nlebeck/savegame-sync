@@ -36,8 +36,8 @@ namespace SavegameSync
             StartOperation("Updating game lists...");
             //await savegameSync.DebugCheckSavegameListFile();
             await savegameSync.DebugCheckLocalGameListFile();
-            await savegameSync.DebugZipAndUploadSave();
-            await savegameSync.DebugDownloadAndUnzipSave();
+            //await savegameSync.DebugZipAndUploadSave();
+            //await savegameSync.DebugDownloadAndUnzipSave();
             Console.WriteLine("Done debugging!");
 
             UpdateLocalGameList();
@@ -161,6 +161,29 @@ namespace SavegameSync
             localGameListBox.IsEnabled = true;
             cloudGameListBox.IsEnabled = true;
             savegameListBox.IsEnabled = true;
+        }
+
+        private async void copyFromCloudButton_Click(object sender, RoutedEventArgs e)
+        {
+            object selectedGame = localGameListBox.SelectedItem;
+            if (selectedGame == null)
+            {
+                return;
+            }
+            string gameName = selectedGame.ToString();
+
+            // Because UpdateSavegameList() populates the ListBox in reverse order, we need to undo
+            // that mapping to calculate the index of the save in the SavegameLiset.
+            int selectedIndex = savegameListBox.SelectedIndex;
+            int saveIndex = (savegameListBox.Items.Count - 1) - selectedIndex;
+            if (saveIndex == -1)
+            {
+                return;
+            }
+
+            StartOperation("Downloading save for " + gameName + "...");
+            await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
+            FinishOperation();
         }
     }
 }

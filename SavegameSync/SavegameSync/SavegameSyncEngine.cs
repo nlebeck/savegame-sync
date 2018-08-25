@@ -300,6 +300,41 @@ namespace SavegameSync
             await WriteSavegameList();
         }
 
+        public async Task DownloadAndUnzipSave(string gameName, int saveIndex)
+        {
+            // Download latest version of SavegameList
+            await ReadSavegameList();
+
+            // Read file name from SavegameList
+            List<SavegameEntry> saves = savegameList.ReadSaves(gameName);
+            SavegameEntry save = saves[saveIndex];
+            Guid saveGuid = save.Guid;
+            string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
+            Debug.WriteLine("Downloading save file " + saveFileName + " with index " + saveIndex + " and timestamp " + save.Timestamp);
+
+            // Download zipped save from Google Drive
+            var files = await SearchFileByNameAsync(saveFileName);
+            Debug.Assert(files.Count == 1);
+            string saveFileId = files[0].Id;
+            string tempDir = @"C:\Users\niell\Git\savegame-sync\tempDownload\";
+            string zipFilePath = Path.Combine(tempDir, saveFileName);
+            Directory.CreateDirectory(tempDir);
+            using (FileStream fileStream = File.OpenWrite(zipFilePath))
+            {
+                await DownloadFile(saveFileId, fileStream);
+            }
+
+            // Unzip zipped save
+            string tempSaveDir = Path.Combine(tempDir, "temp");
+            FileUtils.DeleteIfExists(tempSaveDir);
+            ZipFile.ExtractToDirectory(zipFilePath, tempSaveDir);
+
+            // Copy unzipped files/directories into game install directory
+            string installDir = localGameList.GetInstallDir(gameName);
+            SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(gameName);
+            CopySaveFilesIntoInstallDir(saveSpec, tempSaveDir, installDir);
+        }
+
         public async Task DebugZipAndUploadSave()
         {
             // Wipe Google Drive app folder
@@ -323,33 +358,7 @@ namespace SavegameSync
 
         public async Task DebugDownloadAndUnzipSave()
         {
-            // Download latest version of SavegameList
-            await ReadSavegameList();
-
-            // Read file name from SavegameList
-            Guid saveGuid = savegameList.ReadSaves("Medal of Honor Allied Assault War Chest")[0].Guid;
-            string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
-            Console.WriteLine("Downloading save file " + saveFileName);
-
-            // Download zipped save from Google Drive
-            var files = await SearchFileByNameAsync(saveFileName);
-            Debug.Assert(files.Count == 1);
-            string saveFileId = files[0].Id;
-            string zipFilePath = @"C:\Users\niell\Git\savegame-sync\tempMohaaDownload\" + saveFileName;
-            using (FileStream fileStream = File.OpenWrite(zipFilePath))
-            {
-                await DownloadFile(saveFileId, fileStream);
-            }
-
-            // Unzip zipped save
-            string tempSaveDir = @"C:\Users\niell\Git\savegame-sync\tempMohaaDownload\testmohaa";
-            FileUtils.DeleteIfExists(tempSaveDir);
-            ZipFile.ExtractToDirectory(zipFilePath, tempSaveDir);
-
-            // TODO: Copy unzipped files/directories into game install directory
-            string installDir = "C:\\Program Files (x86)\\GOG Galaxy\\Games\\Medal of Honor - Allied Assault War Chest";
-            SaveSpec mohaaSpec = SaveSpecRepository.GetRepository().GetSaveSpec("Medal of Honor Allied Assault War Chest");
-            CopySaveFilesIntoInstallDir(mohaaSpec, tempSaveDir, installDir);
+            await DownloadAndUnzipSave("Medal of Honor Allied Assault War Chest", 0);
         }
 
         public async Task DebugGoogleDriveFunctions()
