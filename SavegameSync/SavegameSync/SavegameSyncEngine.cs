@@ -375,6 +375,24 @@ namespace SavegameSync
             await DeleteFileAsync(saveFileId);
         }
 
+        public async Task DeleteGameFromCloud(string gameName)
+        {
+            await ReadSavegameList();
+            List<SavegameEntry> saves = savegameList.ReadSaves(gameName);
+            savegameList.DeleteGame(gameName);
+            await WriteSavegameList();
+
+            foreach (SavegameEntry save in saves)
+            {
+                // TODO: refactor out this common deletion code that was copied from DeleteSave()
+                string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(save.Guid);
+                var files = await SearchFileByNameAsync(saveFileName);
+                Debug.Assert(files.Count == 1);
+                string saveFileId = files[0].Id;
+                await DeleteFileAsync(saveFileId);
+            }
+        }
+
         public async Task DebugPrintAllFiles()
         {
             // Print all files in the Google Drive app folder

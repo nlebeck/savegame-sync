@@ -9,7 +9,7 @@
     <Grid>
         <ListBox x:Name="cloudGameListBox" HorizontalAlignment="Left" Height="244" Margin="48,48,0,0" VerticalAlignment="Top" Width="274"/>
         <TextBlock x:Name="cloudGameTextBlock" HorizontalAlignment="Left" Height="20" Margin="48,23,0,0" TextWrapping="Wrap" Text="Games in cloud" VerticalAlignment="Top" Width="82"/>
-        <Button x:Name="deleteGameButton" Content="Delete game from cloud storage" HorizontalAlignment="Left" Margin="48,297,0,0" VerticalAlignment="Top" Width="178"/>
+        <Button x:Name="deleteGameButton" Content="Delete game from cloud storage" HorizontalAlignment="Left" Margin="48,297,0,0" VerticalAlignment="Top" Width="178" Click="deleteGameButton_Click"/>
         <Button x:Name="backButton" Content="Back" HorizontalAlignment="Left" Margin="247,23,0,0" VerticalAlignment="Top" Width="75" Click="backButton_Click"/>
 
     </Grid>

@@ -96,6 +96,11 @@ namespace SavegameSync
             gameEntries[gameName].RemoveAt(indexToRemove);
         }
 
+        public void DeleteGame(string gameName)
+        {
+            gameEntries.Remove(gameName);
+        }
+
         public void DeleteSave(string gameName, int saveIndex)
         {
             Debug.Assert(saveIndex >= 0);
