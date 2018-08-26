@@ -1,13 +1,8 @@
-﻿using Google.Apis.Auth.OAuth2;
-using Google.Apis.Drive.v3;
-using Google.Apis.Services;
-using Google.Apis.Util.Store;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace SavegameSync
@@ -17,13 +12,12 @@ namespace SavegameSync
     /// </summary>
     public class SavegameSyncEngine
     {
-        private const string ApplicationName = "Savegame Sync";
         private const string SavegameListFileName = "savegame-list.txt";
         private const string LocalGameListFileName = "local-game-list.txt";
 
         private static SavegameSyncEngine singleton;
 
-        private DriveService service;
+        private GoogleDriveWrapper googleDriveWrapper;
         private LocalGameList localGameList;
         private SavegameList savegameList;
         private string savegameListFileId;
@@ -44,170 +38,12 @@ namespace SavegameSync
 
         public async Task Login()
         {
-            service = await LoginToGoogleDrive();
+            googleDriveWrapper = await GoogleDriveWrapper.Create();
         }
 
         public bool IsLoggedIn()
         {
-            return service != null;
-        }
-
-        /// <summary>
-        /// Search for files in the appDataFolder having the given name.
-        /// </summary>
-        /// <param name="name">The filename to search for.</param>
-        /// <returns>A list of File objects matching the given filename.</returns>
-        private async Task<List<Google.Apis.Drive.v3.Data.File>> SearchFileByNameAsync(string name)
-        {
-            return await ListFilesHelperAsync(string.Format("name = '{0}'", name));
-        }
-
-        /// <summary>
-        /// List all files in the appDataFolder.
-        /// </summary>
-        /// <returns>A list of File objects corresponding to all files in the appDataFolder.
-        /// </returns>
-        private async Task<List<Google.Apis.Drive.v3.Data.File>> GetAllFilesAsync()
-        {
-            return await ListFilesHelperAsync(null);
-        }
-
-        /// <summary>
-        /// List files in the appDataFolder matching the given query string.
-        /// </summary>
-        /// <param name="query">The query string to use when searching. Set to null to list all
-        /// files.</param>
-        /// <returns>A list of File objects matching the given query string.</returns>
-        /// <remarks>
-        /// See https://developers.google.com/drive/v3/web/search-parameters for documentation of
-        /// the query string.
-        /// 
-        /// TODO: Figure out how to tell if the initial request or subsequent pagination failed,
-        ///       and handle those cases appropriately.
-        /// </remarks>
-        private async Task<List<Google.Apis.Drive.v3.Data.File>> ListFilesHelperAsync(string query)
-        {
-            List<Google.Apis.Drive.v3.Data.File> result = new List<Google.Apis.Drive.v3.Data.File>();
-
-            FilesResource.ListRequest listRequest = service.Files.List();
-            listRequest.Spaces = "appDataFolder";
-            if (query != null)
-            {
-                listRequest.Q = query;
-            }
-
-            bool done = false;
-            Google.Apis.Drive.v3.Data.FileList fileList = await listRequest.ExecuteAsync();
-            while (!done)
-            {
-                IList<Google.Apis.Drive.v3.Data.File> files = fileList.Files;
-                result.AddRange(files);
-                if (fileList.NextPageToken == null)
-                {
-                    Debug.WriteLine("Processed last page");
-                    done = true;
-                }
-                else
-                {
-                    Debug.WriteLine("Retrieving another page");
-                    FilesResource.ListRequest newListRequest = service.Files.List();
-                    newListRequest.Spaces = "appDataFolder";
-                    newListRequest.PageSize = 10;
-                    newListRequest.PageToken = fileList.NextPageToken;
-                    fileList = await newListRequest.ExecuteAsync();
-                }
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Create a file in the appDataFolder.
-        /// </summary>
-        /// <param name="name">The name of the new file</param>
-        /// <returns>The ID of the new file</returns>
-        private async Task<string> CreateFileAsync(string name)
-        {
-            List<string> parents = new List<string>();
-            parents.Add("appDataFolder");
-            var file = new Google.Apis.Drive.v3.Data.File()
-            {
-                Name = name,
-                Parents = parents
-            };
-            FilesResource.CreateRequest createRequest = service.Files.Create(file);
-            createRequest.Fields = "id";
-            var responseFile = await createRequest.ExecuteAsync();
-            return responseFile.Id;
-        }
-
-        /// <summary>
-        /// Delete a file in the appDataFolder.
-        /// </summary>
-        /// <param name="fileId">The ID of the file to delete.</param>
-        private async Task DeleteFileAsync(string fileId)
-        {
-            FilesResource.DeleteRequest deleteRequest = service.Files.Delete(fileId);
-            await deleteRequest.ExecuteAsync();
-        }
-
-        /// <summary>
-        /// Delete all files in the appDataFolder.
-        /// </summary>
-        private async Task DeleteAllFilesAsync()
-        {
-            List<Google.Apis.Drive.v3.Data.File> files = await GetAllFilesAsync();
-            foreach (Google.Apis.Drive.v3.Data.File file in files)
-            {
-                await DeleteFileAsync(file.Id);
-            }
-        }
-
-        /*
-         * Based on the code in the .NET Quickstart in the Google Drive API documentation
-         * (https://developers.google.com/drive/v3/web/quickstart/dotnet).
-         */
-        private async Task<DriveService> LoginToGoogleDrive()
-        {
-            string[] scopes = { DriveService.Scope.DriveAppdata };
-
-            UserCredential credential;
-            using (var stream = new FileStream("google-drive-client-secret.json", FileMode.Open, FileAccess.Read))
-            {
-                string credPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-                credPath = System.IO.Path.Combine(credPath, ".credentials/drive-dotnet-quickstart.json");
-
-                credential = await GoogleWebAuthorizationBroker.AuthorizeAsync(
-                    GoogleClientSecrets.Load(stream).Secrets,
-                    scopes,
-                    "user",
-                    CancellationToken.None,
-                    new FileDataStore(credPath, true));
-                Console.WriteLine("Credential file saved to: " + credPath);
-            }
-
-            DriveService service = new DriveService(new BaseClientService.Initializer()
-            {
-                HttpClientInitializer = credential,
-                ApplicationName = ApplicationName,
-            });
-
-            return service;
-        }
-
-        private async Task DownloadFile(string fileId, Stream stream)
-        {
-            FilesResource.GetRequest getRequest = service.Files.Get(fileId);
-            await getRequest.DownloadAsync(stream);
-        }
-
-        private async Task UploadFile(string fileId, Stream stream, Google.Apis.Drive.v3.Data.File file = null)
-        {
-            if (file == null)
-            {
-                file = new Google.Apis.Drive.v3.Data.File();
-            }
-            FilesResource.UpdateMediaUpload updateMediaUpload = service.Files.Update(file, fileId, stream, file.MimeType);
-            await updateMediaUpload.UploadAsync();
+            return googleDriveWrapper != null;
         }
 
         public async Task DebugPrintSavegameListFile()
@@ -299,10 +135,10 @@ namespace SavegameSync
 
             // Upload save
             string remoteFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
-            string fileId = await CreateFileAsync(remoteFileName);
+            string fileId = await googleDriveWrapper.CreateFileAsync(remoteFileName);
             using (FileStream fileStream = File.OpenRead(zipFile))
             {
-                await UploadFile(fileId, fileStream);
+                await googleDriveWrapper.UploadFileAsync(fileId, fileStream);
             }
 
             // Download latest version of SavegameList
@@ -328,7 +164,7 @@ namespace SavegameSync
             Debug.WriteLine("Downloading save file " + saveFileName + " with index " + saveIndex + " and timestamp " + save.Timestamp);
 
             // Download zipped save from Google Drive
-            var files = await SearchFileByNameAsync(saveFileName);
+            var files = await googleDriveWrapper.SearchFileByNameAsync(saveFileName);
             Debug.Assert(files.Count == 1);
             string saveFileId = files[0].Id;
             string tempDir = @"C:\Users\niell\Git\savegame-sync\tempDownload\";
@@ -336,7 +172,7 @@ namespace SavegameSync
             Directory.CreateDirectory(tempDir);
             using (FileStream fileStream = File.OpenWrite(zipFilePath))
             {
-                await DownloadFile(saveFileId, fileStream);
+                await googleDriveWrapper.DownloadFileAsync(saveFileId, fileStream);
             }
 
             // Unzip zipped save
@@ -369,10 +205,8 @@ namespace SavegameSync
 
             // Delete zipped save file
             string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid);
-            var files = await SearchFileByNameAsync(saveFileName);
-            Debug.Assert(files.Count == 1);
-            string saveFileId = files[0].Id;
-            await DeleteFileAsync(saveFileId);
+            int filesDeleted = await googleDriveWrapper.DeleteAllFilesWithNameAsync(saveFileName);
+            Debug.Assert(filesDeleted == 1);
         }
 
         public async Task DeleteGameFromCloud(string gameName)
@@ -384,12 +218,9 @@ namespace SavegameSync
 
             foreach (SavegameEntry save in saves)
             {
-                // TODO: refactor out this common deletion code that was copied from DeleteSave()
                 string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(save.Guid);
-                var files = await SearchFileByNameAsync(saveFileName);
-                Debug.Assert(files.Count == 1);
-                string saveFileId = files[0].Id;
-                await DeleteFileAsync(saveFileId);
+                int filesDeleted = await googleDriveWrapper.DeleteAllFilesWithNameAsync(saveFileName);
+                Debug.Assert(filesDeleted == 1);
             }
         }
 
@@ -397,7 +228,7 @@ namespace SavegameSync
         {
             // Print all files in the Google Drive app folder
             Console.WriteLine("Listing all files: ");
-            var files = await GetAllFilesAsync();
+            var files = await googleDriveWrapper.GetAllFilesAsync();
             for (int i = 0; i < files.Count; i++)
             {
                 Console.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
@@ -408,7 +239,7 @@ namespace SavegameSync
         public async Task DebugZipAndUploadSave()
         {
             // Wipe Google Drive app folder
-            await DeleteAllFilesAsync();
+            await googleDriveWrapper.DeleteAllFilesAsync();
 
             await ZipAndUploadSave("Medal of Honor Allied Assault War Chest");
 
@@ -430,10 +261,10 @@ namespace SavegameSync
             for (int i = 0; i < 20; i++)
             {
                 Console.WriteLine("Creating dummy file " + i);
-                dummyFileIds.Add(await CreateFileAsync("DummyFile" + i));
+                dummyFileIds.Add(await googleDriveWrapper.CreateFileAsync("DummyFile" + i));
             }
 
-            var fileList = await GetAllFilesAsync();
+            var fileList = await googleDriveWrapper.GetAllFilesAsync();
             Console.WriteLine("Printing all files for the first time");
             foreach (Google.Apis.Drive.v3.Data.File file in fileList)
             {
@@ -444,10 +275,10 @@ namespace SavegameSync
             for (int i = 0; i < dummyFileIds.Count; i++)
             {
                 Console.WriteLine("Deleting dummy file " + i);
-                await DeleteFileAsync(dummyFileIds[i]);
+                await googleDriveWrapper.DeleteFileAsync(dummyFileIds[i]);
             }
 
-            fileList = await GetAllFilesAsync();
+            fileList = await googleDriveWrapper.GetAllFilesAsync();
             Console.WriteLine("Printing all files for the second time");
             foreach (Google.Apis.Drive.v3.Data.File file in fileList)
             {
@@ -537,11 +368,11 @@ namespace SavegameSync
             }
 
             Debug.WriteLine("Looking up savegame list fileId (no fileId cached)");
-            List<Google.Apis.Drive.v3.Data.File> files = await SearchFileByNameAsync(SavegameListFileName);
+            List<Google.Apis.Drive.v3.Data.File> files = await googleDriveWrapper.SearchFileByNameAsync(SavegameListFileName);
             string id = null;
             if (files.Count == 0)
             {
-                id = await CreateFileAsync(SavegameListFileName);
+                id = await googleDriveWrapper.CreateFileAsync(SavegameListFileName);
                 Debug.WriteLine("Created new savegame list with Id " + id);
             }
             else if (files.Count == 1)
@@ -580,7 +411,7 @@ namespace SavegameSync
             }
 
             MemoryStream stream = new MemoryStream();
-            await DownloadFile(fileId, stream);
+            await googleDriveWrapper.DownloadFileAsync(fileId, stream);
             savegameList = new SavegameList();
             await savegameList.ReadFromStream(stream);
         }
@@ -604,14 +435,14 @@ namespace SavegameSync
             MemoryStream stream = new MemoryStream();
 
             await savegameList.WriteToStream(stream);
-            await UploadFile(fileId, stream);
+            await googleDriveWrapper.UploadFileAsync(fileId, stream);
             stream.Close();
         }
 
         private async Task DebugCheckFileDownloadUpload(string fileId)
         {
             MemoryStream stream = new MemoryStream();
-            await DownloadFile(fileId, stream);
+            await googleDriveWrapper.DownloadFileAsync(fileId, stream);
             Debug.WriteLine("Stream length: " + stream.Length);
             Debug.WriteLine("Stream position: " + stream.Position);
             stream.Position = 0;
@@ -629,7 +460,7 @@ namespace SavegameSync
             streamWriter.WriteLine(testStr);
             streamWriter.Flush();
 
-            await UploadFile(fileId, newContentStream);
+            await googleDriveWrapper.UploadFileAsync(fileId, newContentStream);
             streamWriter.Close();
         }
     }
