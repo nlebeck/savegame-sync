@@ -120,7 +120,7 @@
       <DependentUpon>ConfirmationDialog.xaml</DependentUpon>
     </Compile>
     <Compile Include="FileUtils.cs" />
-    <Compile Include="GoogleDriveUtils.cs" />
+    <Compile Include="GoogleDriveWrapper.cs" />
     <Compile Include="LocalGameList.cs" />
     <Compile Include="SavegameList.cs" />
     <Compile Include="SavegameSyncEngine.cs" />
