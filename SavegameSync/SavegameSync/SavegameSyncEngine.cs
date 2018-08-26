@@ -47,6 +47,11 @@ namespace SavegameSync
             service = await LoginToGoogleDrive();
         }
 
+        public bool IsLoggedIn()
+        {
+            return service != null;
+        }
+
         /// <summary>
         /// Search for files in the appDataFolder having the given name.
         /// </summary>
@@ -535,8 +540,9 @@ namespace SavegameSync
             return id;
         }
 
-        public List<string> GetCloudGameNames()
+        public async Task<List<string>> GetCloudGameNames()
         {
+            await ReadSavegameList();
             if (savegameList == null)
             {
                 return null;

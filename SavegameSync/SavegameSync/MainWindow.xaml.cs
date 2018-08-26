@@ -25,18 +25,19 @@ namespace SavegameSync
             base.OnInitialized(e);
 
             localGameListBox.Items.Add("Loading...");
-            cloudGameListBox.Items.Add("Loading...");
             savegameListBox.Items.Add("Loading...");
 
             StartOperation("Logging in...");
             savegameSync = SavegameSyncEngine.GetInstance();
             await savegameSync.Init();
-            await savegameSync.Login();
+            if (!savegameSync.IsLoggedIn())
+            {
+                await savegameSync.Login();
+            }
             FinishOperation();
 
             StartOperation("Updating game lists...");
             UpdateLocalGameList();
-            UpdateCloudGameList();
             FinishOperation();
         }
 
@@ -73,23 +74,6 @@ namespace SavegameSync
             // Because UpdateSavegameList() populates the ListBox in reverse order, we need to undo
             // that mapping to calculate the index of the save in the SavegameLiset.
             return (savegameListBox.Items.Count - 1) - listBoxIndex;
-        }
-
-        private void UpdateCloudGameList()
-        {
-            cloudGameListBox.Items.Clear();
-            List<string> cloudGameNames = savegameSync.GetCloudGameNames();
-
-            if (cloudGameNames == null)
-            {
-                cloudGameListBox.Items.Add("Error: could not read list");
-                return;
-            }
-
-            foreach (string gameName in cloudGameNames)
-            {
-                cloudGameListBox.Items.Add(gameName);
-            }
         }
 
         private async void addGameButton_Click(object sender, RoutedEventArgs e)
@@ -177,7 +161,6 @@ namespace SavegameSync
             copyFromCloudButton.IsEnabled = false;
             addGameButton.IsEnabled = false;
             localGameListBox.IsEnabled = false;
-            cloudGameListBox.IsEnabled = false;
             savegameListBox.IsEnabled = false;
         }
 
@@ -188,7 +171,6 @@ namespace SavegameSync
             copyFromCloudButton.IsEnabled = true;
             addGameButton.IsEnabled = true;
             localGameListBox.IsEnabled = true;
-            cloudGameListBox.IsEnabled = true;
             savegameListBox.IsEnabled = true;
         }
 
@@ -244,6 +226,16 @@ namespace SavegameSync
             await savegameSync.DebugPrintSavegameListFile();
             await savegameSync.DebugPrintAllFiles();
             FinishOperation();
+        }
+
+        private void cloudGameListButton_Click(object sender, RoutedEventArgs e)
+        {
+            // The window-switching code in this app is based on this StackOverflow post:
+            // https://stackoverflow.com/a/21706434.
+
+            CloudGameListWindow window = new CloudGameListWindow();
+            window.Show();
+            this.Close();
         }
     }
 }

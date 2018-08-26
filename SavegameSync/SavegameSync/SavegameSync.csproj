@@ -113,6 +113,9 @@
     <Compile Include="AddGameDialog.xaml.cs">
       <DependentUpon>AddGameDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CloudGameListWindow.xaml.cs">
+      <DependentUpon>CloudGameListWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="FileUtils.cs" />
     <Compile Include="LocalGameList.cs" />
     <Compile Include="SavegameList.cs" />
@@ -121,6 +124,10 @@
     <Compile Include="SaveSpec.cs" />
     <Compile Include="SaveSpecRepository.cs" />
     <Page Include="AddGameDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="CloudGameListWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
