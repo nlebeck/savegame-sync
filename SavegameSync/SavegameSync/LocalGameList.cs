@@ -40,6 +40,11 @@ namespace SavegameSync
             gameInstallDirs.Add(gameName, installDir);
         }
 
+        public void DeleteGame(string gameName)
+        {
+            gameInstallDirs.Remove(gameName);
+        }
+
         public string GetInstallDir(string gameName)
         {
             if (!gameInstallDirs.ContainsKey(gameName))

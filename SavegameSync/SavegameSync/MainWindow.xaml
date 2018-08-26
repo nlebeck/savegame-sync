@@ -10,7 +10,7 @@
         <ListBox x:Name="localGameListBox" HorizontalAlignment="Left" Height="146" Margin="36,74,0,0" VerticalAlignment="Top" Width="293" SelectionChanged="localGameListBox_SelectionChanged"/>
         <Button x:Name="copyToCloudButton" Content="Upload local save to cloud" HorizontalAlignment="Left" Height="23" Margin="35,225,0,0" VerticalAlignment="Top" Width="147" Click="copyToCloudButton_Click"/>
         <Button x:Name="copyFromCloudButton" Content="Copy selected save from cloud" HorizontalAlignment="Left" Height="23" Margin="35,253,0,0" VerticalAlignment="Top" Width="172" Click="copyFromCloudButton_Click"/>
-        <Button x:Name="addGameButton" Content="Add game" HorizontalAlignment="Left" Height="23" Margin="163,46,0,0" VerticalAlignment="Top" Width="65" Click="addGameButton_Click"/>
+        <Button x:Name="addGameButton" Content="Add game" HorizontalAlignment="Left" Height="23" Margin="184,45,0,0" VerticalAlignment="Top" Width="65" Click="addGameButton_Click"/>
         <TextBlock x:Name="localGameTextBlock" HorizontalAlignment="Left" Height="20" Margin="36,49,0,0" TextWrapping="Wrap" Text="Local games" VerticalAlignment="Top" Width="82"/>
         <ListBox x:Name="savegameListBox" HorizontalAlignment="Left" Height="213" Margin="547,102,0,0" VerticalAlignment="Top" Width="200"/>
         <TextBlock x:Name="savegameTextBlock" HorizontalAlignment="Left" Margin="547,49,0,0" TextWrapping="Wrap" Text="Cloud savegames for: " VerticalAlignment="Top"/>
@@ -22,6 +22,7 @@
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="35,299,0,0" TextWrapping="Wrap" Text="Timestamp of local save files for selected game:" VerticalAlignment="Top" Width="259"/>
         <TextBlock x:Name="localSaveTimestampTextBlock" HorizontalAlignment="Left" Margin="299,299,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="243"/>
         <Button x:Name="cloudGameListButton" Content="View games in cloud storage" HorizontalAlignment="Left" Margin="35,378,0,0" VerticalAlignment="Top" Width="160" Click="cloudGameListButton_Click"/>
+        <Button x:Name="deleteLocalGameButton" Content="Delete game" HorizontalAlignment="Left" Margin="254,46,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="deleteLocalGameButton_Click"/>
 
     </Grid>
 </Window>

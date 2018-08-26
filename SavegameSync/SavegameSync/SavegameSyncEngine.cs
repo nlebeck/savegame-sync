@@ -67,7 +67,7 @@ namespace SavegameSync
 
         public async Task WriteLocalGameList()
         {
-            FileStream localGameListWriteStream = File.Open(LocalGameListFileName, FileMode.Open);
+            FileStream localGameListWriteStream = File.Open(LocalGameListFileName, FileMode.Create);
             await localGameList.WriteToStream(localGameListWriteStream);
             localGameListWriteStream.Close();
         }
@@ -85,6 +85,12 @@ namespace SavegameSync
         public async Task AddLocalGame(string gameName, string installDir)
         {
             localGameList.AddGame(gameName, installDir);
+            await WriteLocalGameList();
+        }
+
+        public async Task DeleteLocalGame(string gameName)
+        {
+            localGameList.DeleteGame(gameName);
             await WriteLocalGameList();
         }
 

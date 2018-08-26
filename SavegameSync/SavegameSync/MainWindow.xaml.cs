@@ -108,7 +108,12 @@ namespace SavegameSync
 
         private async void localGameListBox_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (e.AddedItems.Count == 0)
+            {
+                return;
+            }
             Debug.Assert(e.AddedItems.Count == 1);
+
             string gameName = e.AddedItems[0].ToString();
 
             await UpdateSavegameList(gameName);
@@ -236,6 +241,30 @@ namespace SavegameSync
             CloudGameListWindow window = new CloudGameListWindow();
             window.Show();
             this.Close();
+        }
+
+        private async void deleteLocalGameButton_Click(object sender, RoutedEventArgs e)
+        {
+            object selectedGame = localGameListBox.SelectedItem;
+            if (selectedGame == null)
+            {
+                return;
+            }
+            string gameName = selectedGame.ToString();
+
+            string message = "Delete " + gameName + " from local game list? (All cloud saves for "
+                                       + "this game will remain in the cloud, but you'll have to "
+                                       + "add this game to the local game list again to download "
+                                       + "or upload saves.)";
+            ConfirmationDialog dialog = new ConfirmationDialog(message);
+            bool? result = dialog.ShowDialog();
+            if (result.HasValue && result.GetValueOrDefault())
+            {
+                StartOperation("Deleting game from local game list...");
+                await savegameSync.DeleteLocalGame(gameName);
+                UpdateLocalGameList();
+                FinishOperation();
+            }
         }
     }
 }
