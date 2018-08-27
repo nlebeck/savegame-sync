@@ -122,6 +122,9 @@
     <Compile Include="FileUtils.cs" />
     <Compile Include="GoogleDriveWrapper.cs" />
     <Compile Include="LocalGameList.cs" />
+    <Compile Include="OrphanedSaveWindow.xaml.cs">
+      <DependentUpon>OrphanedSaveWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SavegameList.cs" />
     <Compile Include="SavegameSyncEngine.cs" />
     <Compile Include="SavegameSyncUtils.cs" />
@@ -151,6 +154,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="OrphanedSaveWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

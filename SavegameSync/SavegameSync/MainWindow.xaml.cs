@@ -266,5 +266,12 @@ namespace SavegameSync
                 FinishOperation();
             }
         }
+
+        private void orphanedSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            OrphanedSaveWindow window = new OrphanedSaveWindow();
+            window.Show();
+            Close();
+        }
     }
 }

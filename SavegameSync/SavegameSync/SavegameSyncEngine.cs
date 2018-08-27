@@ -230,6 +230,48 @@ namespace SavegameSync
             }
         }
 
+        public async Task<List<string>> GetOrphanedSaveFileNames()
+        {
+            List<string> orphanedSaveFileNames = new List<string>();
+            await ReadSavegameList();
+            var files = await googleDriveWrapper.GetAllFilesAsync();
+            foreach (var file in files)
+            {
+                bool foundFile = false;
+
+                // Special case for the SavegameList file, which should be the only file that is
+                // not a save file itself.
+                if (file.Name == SavegameListFileName)
+                {
+                    foundFile = true;
+                }
+
+                foreach (string gameName in savegameList.GetGames())
+                {
+                    foreach (SavegameEntry entry in savegameList.ReadSaves(gameName))
+                    {
+                        string entryFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(entry.Guid);
+                        if (entryFileName == file.Name)
+                        {
+                            foundFile = true;
+                        }
+                    }
+                }
+
+                if (!foundFile)
+                {
+                    orphanedSaveFileNames.Add(file.Name);
+                }
+            }
+            return orphanedSaveFileNames;
+        }
+
+        public async Task DeleteOrphanedSaveFile(string saveFileName)
+        {
+            int numDeleted = await googleDriveWrapper.DeleteAllFilesWithNameAsync(saveFileName);
+            Debug.Assert(numDeleted == 1);
+        }
+
         public async Task DebugPrintAllFiles()
         {
             // Print all files in the Google Drive app folder
