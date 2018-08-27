@@ -272,6 +272,24 @@ namespace SavegameSync
             Debug.Assert(numDeleted == 1);
         }
 
+        /// <summary>
+        /// Download an orphaned save file into the current working directory.
+        /// </summary>
+        public async Task DownloadOrphanedSaveFile(string saveFileName)
+        {
+            FileUtils.DeleteIfExists(saveFileName);
+
+            var files = await googleDriveWrapper.SearchFileByNameAsync(saveFileName);
+            Debug.Assert(files.Count == 1);
+            string fileId = files[0].Id;
+
+            using (FileStream outputStream = File.Open(saveFileName, FileMode.CreateNew))
+            {
+                await googleDriveWrapper.DownloadFileAsync(fileId, outputStream);
+                outputStream.Flush();
+            }
+        }
+
         public async Task DebugPrintAllFiles()
         {
             // Print all files in the Google Drive app folder

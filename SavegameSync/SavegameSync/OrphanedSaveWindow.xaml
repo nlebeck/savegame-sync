@@ -9,7 +9,7 @@
     <Grid>
         <ListBox x:Name="orphanedSaveListBox" HorizontalAlignment="Left" Height="169" Margin="33,44,0,0" VerticalAlignment="Top" Width="223"/>
         <TextBlock x:Name="textBlock" HorizontalAlignment="Left" Margin="33,23,0,0" TextWrapping="Wrap" Text="Orphaned saves" VerticalAlignment="Top" Width="93"/>
-        <Button x:Name="downloadSaveButton" Content="Download save" HorizontalAlignment="Left" Margin="33,218,0,0" VerticalAlignment="Top" Width="93"/>
+        <Button x:Name="downloadSaveButton" Content="Download save" HorizontalAlignment="Left" Margin="33,218,0,0" VerticalAlignment="Top" Width="93" Click="downloadSaveButton_Click"/>
         <Button x:Name="deleteSaveButton" Content="Delete save" HorizontalAlignment="Left" Margin="33,243,0,0" VerticalAlignment="Top" Width="93" Click="deleteSaveButton_Click"/>
         <Button x:Name="backButton" Content="Back" HorizontalAlignment="Left" Margin="181,19,0,0" VerticalAlignment="Top" Width="75" Click="backButton_Click"/>
 

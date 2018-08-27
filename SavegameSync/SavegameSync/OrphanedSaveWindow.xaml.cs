@@ -93,5 +93,30 @@ namespace SavegameSync
             window.Show();
             Close();
         }
+
+        private async void downloadSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            object selection = orphanedSaveListBox.SelectedItem;
+            if (selection == null)
+            {
+                return;
+            }
+            string saveFileName = selection.ToString();
+            if (saveFileName == EMPTY_LIST_MESSAGE)
+            {
+                return;
+            }
+
+            string message = "Download orphaned save file? (The zip file will be downloaded into"
+                           + " the directory in which this app was launched.)";
+            ConfirmationDialog dialog = new ConfirmationDialog(message);
+            bool? result = dialog.ShowDialog();
+            if (result.HasValue && result.GetValueOrDefault())
+            {
+                StartOperation();
+                await savegameSync.DownloadOrphanedSaveFile(saveFileName);
+                FinishOperation();
+            }
+        }
     }
 }
