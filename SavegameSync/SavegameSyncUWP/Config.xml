@@ -1,4 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<settings>
-  <clientId>xxx</clientId> <!--I am not sure what best practices are regarding saving OAuth client IDs in code, so for now, I will leave the client ID out of the code that appears online-->
-</settings>

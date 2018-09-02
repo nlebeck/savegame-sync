@@ -51,17 +51,9 @@ save to determine the timestamp of the overall save. This method of calculating
 the timestamp works in most cases, but if the user only deletes some files and
 does not add or modify any files, the timestamp will be incorrect.
 
-## Repository organization
-
-SavegameSync is a Visual Studio solution directory. The subdirectory
-SavegameSync holds the version of the app that I'm currently working on,
-while the SavegameSyncUWP subdirectory holds the UWP version of the app that I
-started on but abandoned due to difficulties fixing dependency issues between
-UWP and the Google Drive NuGet package.
-
 ## OneDrive bugs
 
 I had originally planned to use OneDrive to sync data, but I ran into some bugs
-trying to create files in OneDrive from either the UWP or WPF version of my
-app. This issue describes the problems I encountered:
+trying to create files in OneDrive from either a UWP or WPF app. This issue
+describes the problems I encountered:
 https://github.com/OneDrive/onedrive-sdk-csharp/issues/204.
