@@ -126,6 +126,9 @@
       <DependentUpon>OrphanedSaveWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SavegameList.cs" />
+    <Compile Include="SavegameListControl.xaml.cs">
+      <DependentUpon>SavegameListControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="SavegameSyncEngine.cs" />
     <Compile Include="SavegameSyncUtils.cs" />
     <Compile Include="SaveSpec.cs" />
@@ -155,6 +158,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="OrphanedSaveWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SavegameListControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

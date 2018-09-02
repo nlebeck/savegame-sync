@@ -25,7 +25,6 @@ namespace SavegameSync
             base.OnInitialized(e);
 
             localGameListBox.Items.Add("Loading...");
-            savegameListBox.Items.Add("Loading...");
 
             StartOperation("Logging in...");
             savegameSync = SavegameSyncEngine.GetInstance();
@@ -35,6 +34,8 @@ namespace SavegameSync
                 await savegameSync.Login();
             }
             FinishOperation();
+
+            savegameListControl.Initialize();
 
             StartOperation("Updating game lists...");
             UpdateLocalGameList();
@@ -49,31 +50,6 @@ namespace SavegameSync
             {
                 localGameListBox.Items.Add(gameName);
             }
-        }
-
-        private async Task UpdateSavegameList(string gameName)
-        {
-            savegameListBox.Items.Clear();
-            savegameListBox.Items.Add("Loading...");
-            currentGameTextBlock.Text = gameName;
-
-            List<SavegameEntry> saves = await savegameSync.ReadSaves(gameName);
-            savegameListBox.Items.Clear();
-            for (int i = saves.Count - 1; i >= 0; i--)
-            {
-                savegameListBox.Items.Add(saves[i].Timestamp);
-            }
-            if (saves.Count == 0)
-            {
-                savegameListBox.Items.Add("No saves found.");
-            }
-        }
-
-        private int GetSaveIndexFromListBoxIndex(int listBoxIndex)
-        {
-            // Because UpdateSavegameList() populates the ListBox in reverse order, we need to undo
-            // that mapping to calculate the index of the save in the SavegameLiset.
-            return (savegameListBox.Items.Count - 1) - listBoxIndex;
         }
 
         private async void addGameButton_Click(object sender, RoutedEventArgs e)
@@ -116,7 +92,7 @@ namespace SavegameSync
 
             string gameName = e.AddedItems[0].ToString();
 
-            await UpdateSavegameList(gameName);
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
             UpdateLocalSavegameTimestampDisplay(gameName);
         }
 
@@ -155,7 +131,7 @@ namespace SavegameSync
             string gameName = selectedGame.ToString();
             StartOperation("Uploading save for " + gameName + "...");
             await savegameSync.ZipAndUploadSave(gameName);
-            await UpdateSavegameList(gameName);
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
             FinishOperation();
         }
 
@@ -166,7 +142,7 @@ namespace SavegameSync
             copyFromCloudButton.IsEnabled = false;
             addGameButton.IsEnabled = false;
             localGameListBox.IsEnabled = false;
-            savegameListBox.IsEnabled = false;
+            savegameListControl.Disable();
         }
 
         private void FinishOperation()
@@ -176,7 +152,7 @@ namespace SavegameSync
             copyFromCloudButton.IsEnabled = true;
             addGameButton.IsEnabled = true;
             localGameListBox.IsEnabled = true;
-            savegameListBox.IsEnabled = true;
+            savegameListControl.Enable();
         }
 
         private async void copyFromCloudButton_Click(object sender, RoutedEventArgs e)
@@ -188,12 +164,11 @@ namespace SavegameSync
             }
             string gameName = selectedGame.ToString();
 
-            int selectedIndex = savegameListBox.SelectedIndex;
-            if (selectedIndex == -1)
+            int saveIndex = savegameListControl.GetSelectedSaveIndex();
+            if (saveIndex == -1)
             {
                 return;
             }
-            int saveIndex = GetSaveIndexFromListBoxIndex(selectedIndex);
 
             StartOperation("Downloading save for " + gameName + "...");
             await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
@@ -210,16 +185,15 @@ namespace SavegameSync
             }
             string gameName = selectedGame.ToString();
 
-            int selectedIndex = savegameListBox.SelectedIndex;
-            if (selectedIndex == -1)
+            int saveIndex = savegameListControl.GetSelectedSaveIndex();
+            if (saveIndex == -1)
             {
                 return;
             }
-            int saveIndex = GetSaveIndexFromListBoxIndex(selectedIndex);
 
             StartOperation("Deleting cloud save for " + gameName + "...");
             await savegameSync.DeleteSave(gameName, saveIndex);
-            await UpdateSavegameList(gameName);
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
             FinishOperation();
         }
 
