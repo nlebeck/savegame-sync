@@ -384,10 +384,13 @@ namespace SavegameSync
             foreach (string subPath in saveSpec.SavePaths)
             {
                 string fullSubPath = Path.Combine(installDir, subPath);
-                DateTime subPathTimestamp = FileUtils.GetLatestFileWriteTime(fullSubPath);
-                if (subPathTimestamp > timestamp)
+                if (Directory.Exists(fullSubPath))
                 {
-                    timestamp = subPathTimestamp;
+                    DateTime subPathTimestamp = FileUtils.GetLatestFileWriteTime(fullSubPath);
+                    if (subPathTimestamp > timestamp)
+                    {
+                        timestamp = subPathTimestamp;
+                    }
                 }
             }
             return timestamp;

@@ -37,7 +37,7 @@ namespace SavegameSync
 
         public void AddGame(string gameName, string installDir)
         {
-            gameInstallDirs.Add(gameName, installDir);
+            gameInstallDirs[gameName] = installDir;
         }
 
         public void DeleteGame(string gameName)

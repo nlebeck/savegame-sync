@@ -79,6 +79,7 @@ namespace SavegameSync
             {
                 await savegameSync.AddLocalGame(gameName, path);
                 UpdateLocalGameList();
+                UpdateLocalGameInfoDisplays(null);
             }
         }
 
@@ -98,6 +99,13 @@ namespace SavegameSync
 
         private void UpdateLocalGameInfoDisplays(string selectedGameName)
         {
+            if (selectedGameName == null)
+            {
+                localSaveTimestampTextBlock.Text = "";
+                installDirTextBlock.Text = "";
+                return;
+            }
+
             string timestampMessage = null;
             string installDir = savegameSync.GetLocalInstallDir(selectedGameName);
             SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(selectedGameName);
@@ -248,6 +256,7 @@ namespace SavegameSync
                 StartOperation("Deleting game from local game list...");
                 await savegameSync.DeleteLocalGame(gameName);
                 UpdateLocalGameList();
+                UpdateLocalGameInfoDisplays(null);
                 FinishOperation();
             }
         }
