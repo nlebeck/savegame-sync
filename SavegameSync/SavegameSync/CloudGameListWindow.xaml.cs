@@ -46,7 +46,8 @@ namespace SavegameSync
             backButton.IsEnabled = false;
             deleteGameButton.IsEnabled = false;
             cloudGameListBox.IsEnabled = false;
-            savegameListControl.Disable();
+            deleteSaveButton.IsEnabled = false;
+            savegameListControl.IsEnabled = false;
         }
 
         private void FinishOperation()
@@ -54,7 +55,8 @@ namespace SavegameSync
             backButton.IsEnabled = true;
             deleteGameButton.IsEnabled = true;
             cloudGameListBox.IsEnabled = true;
-            savegameListControl.Enable();
+            deleteSaveButton.IsEnabled = true;
+            savegameListControl.IsEnabled = true;
         }
 
         private async Task UpdateCloudGameList()

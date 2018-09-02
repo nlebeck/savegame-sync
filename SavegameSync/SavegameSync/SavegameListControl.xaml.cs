@@ -81,14 +81,26 @@ namespace SavegameSync
             return (savegameListBox.Items.Count - 1) - listBoxIndex;
         }
 
-        public void Enable()
+        private void Enable()
         {
             savegameListBox.IsEnabled = true;
         }
 
-        public void Disable()
+        private void Disable()
         {
             savegameListBox.IsEnabled = false;
+        }
+
+        private void UserControl_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if ((bool)e.NewValue)
+            {
+                Enable();
+            }
+            else
+            {
+                Disable();
+            }
         }
     }
 }

@@ -142,7 +142,12 @@ namespace SavegameSync
             copyFromCloudButton.IsEnabled = false;
             addGameButton.IsEnabled = false;
             localGameListBox.IsEnabled = false;
-            savegameListControl.Disable();
+            deleteLocalGameButton.IsEnabled = false;
+            deleteCloudSaveButton.IsEnabled = false;
+            debugButton.IsEnabled = false;
+            cloudGameListButton.IsEnabled = false;
+            orphanedSaveButton.IsEnabled = false;
+            savegameListControl.IsEnabled = false;
         }
 
         private void FinishOperation()
@@ -152,7 +157,12 @@ namespace SavegameSync
             copyFromCloudButton.IsEnabled = true;
             addGameButton.IsEnabled = true;
             localGameListBox.IsEnabled = true;
-            savegameListControl.Enable();
+            deleteLocalGameButton.IsEnabled = true;
+            deleteCloudSaveButton.IsEnabled = true;
+            debugButton.IsEnabled = true;
+            cloudGameListButton.IsEnabled = true;
+            orphanedSaveButton.IsEnabled = true;
+            savegameListControl.IsEnabled = true;
         }
 
         private async void copyFromCloudButton_Click(object sender, RoutedEventArgs e)
