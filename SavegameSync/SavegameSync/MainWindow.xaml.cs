@@ -93,32 +93,33 @@ namespace SavegameSync
             string gameName = e.AddedItems[0].ToString();
 
             await savegameListControl.SetGameAndUpdateAsync(gameName);
-            UpdateLocalSavegameTimestampDisplay(gameName);
+            UpdateLocalGameInfoDisplays(gameName);
         }
 
-        private void UpdateLocalSavegameTimestampDisplay(string selectedGameName)
+        private void UpdateLocalGameInfoDisplays(string selectedGameName)
         {
-            string message = null;
+            string timestampMessage = null;
             string installDir = savegameSync.GetLocalInstallDir(selectedGameName);
             SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(selectedGameName);
             if (installDir == null)
             {
-                message = "Error: game not in local game list";
+                timestampMessage = "Error: game not in local game list";
             }
             else if (saveSpec == null)
             {
-                message = "Error: save spec not found";
+                timestampMessage = "Error: save spec not found";
             }
             else if (!Directory.Exists(installDir))
             {
-                message = "Error: install dir does not exist";
+                timestampMessage = "Error: install dir does not exist";
             }
             else
             {
                 DateTime timestamp = savegameSync.GetLocalSaveTimestamp(saveSpec, installDir);
-                message = timestamp.ToString();
+                timestampMessage = timestamp.ToString();
             }
-            localSaveTimestampTextBlock.Text = message;
+            localSaveTimestampTextBlock.Text = timestampMessage;
+            installDirTextBlock.Text = installDir;
         }
 
         private async void copyToCloudButton_Click(object sender, RoutedEventArgs e)
@@ -182,7 +183,7 @@ namespace SavegameSync
 
             StartOperation("Downloading save for " + gameName + "...");
             await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
-            UpdateLocalSavegameTimestampDisplay(gameName);
+            UpdateLocalGameInfoDisplays(gameName);
             FinishOperation();
         }
 
