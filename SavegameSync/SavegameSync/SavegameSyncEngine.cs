@@ -383,14 +383,20 @@ namespace SavegameSync
             DateTime timestamp = new DateTime(0);
             foreach (string subPath in saveSpec.SavePaths)
             {
+                DateTime subPathTimestamp = new DateTime(0);
                 string fullSubPath = Path.Combine(installDir, subPath);
                 if (Directory.Exists(fullSubPath))
                 {
-                    DateTime subPathTimestamp = FileUtils.GetLatestFileWriteTime(fullSubPath);
-                    if (subPathTimestamp > timestamp)
-                    {
-                        timestamp = subPathTimestamp;
-                    }
+                    subPathTimestamp = FileUtils.GetLatestFileWriteTime(fullSubPath);
+                }
+                else if (File.Exists(fullSubPath))
+                {
+                    subPathTimestamp = new FileInfo(fullSubPath).LastWriteTimeUtc;
+                }
+
+                if (subPathTimestamp > timestamp)
+                {
+                    timestamp = subPathTimestamp;
                 }
             }
             return timestamp;
@@ -418,7 +424,7 @@ namespace SavegameSync
                 }
                 else if (File.Exists(sourcePath))
                 {
-                    FileUtils.CopyDirectory(sourcePath, destPath);
+                    File.Copy(sourcePath, destPath);
                 }
                 else
                 {
