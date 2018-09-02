@@ -177,7 +177,7 @@ namespace SavegameSync
                     "user",
                     CancellationToken.None,
                     new FileDataStore(credPath, true));
-                Console.WriteLine("Credential file saved to: " + credPath);
+                Debug.WriteLine("Credential file saved to: " + credPath);
             }
 
             DriveService service = new DriveService(new BaseClientService.Initializer()

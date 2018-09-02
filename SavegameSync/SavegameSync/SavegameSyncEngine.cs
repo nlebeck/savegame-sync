@@ -293,13 +293,13 @@ namespace SavegameSync
         public async Task DebugPrintAllFiles()
         {
             // Print all files in the Google Drive app folder
-            Console.WriteLine("Listing all files: ");
+            Debug.WriteLine("Listing all files: ");
             var files = await googleDriveWrapper.GetAllFilesAsync();
             for (int i = 0; i < files.Count; i++)
             {
-                Console.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
+                Debug.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
             }
-            Console.WriteLine("Done listing all files");
+            Debug.WriteLine("Done listing all files");
         }
 
         public async Task DebugZipAndUploadSave()
@@ -326,31 +326,31 @@ namespace SavegameSync
             List<string> dummyFileIds = new List<string>();
             for (int i = 0; i < 20; i++)
             {
-                Console.WriteLine("Creating dummy file " + i);
+                Debug.WriteLine("Creating dummy file " + i);
                 dummyFileIds.Add(await googleDriveWrapper.CreateFileAsync("DummyFile" + i));
             }
 
             var fileList = await googleDriveWrapper.GetAllFilesAsync();
-            Console.WriteLine("Printing all files for the first time");
+            Debug.WriteLine("Printing all files for the first time");
             foreach (Google.Apis.Drive.v3.Data.File file in fileList)
             {
-                Console.WriteLine($"{file.Name}, {file.Id}");
+                Debug.WriteLine($"{file.Name}, {file.Id}");
             }
-            Console.WriteLine("Done printing all files for the first time");
+            Debug.WriteLine("Done printing all files for the first time");
 
             for (int i = 0; i < dummyFileIds.Count; i++)
             {
-                Console.WriteLine("Deleting dummy file " + i);
+                Debug.WriteLine("Deleting dummy file " + i);
                 await googleDriveWrapper.DeleteFileAsync(dummyFileIds[i]);
             }
 
             fileList = await googleDriveWrapper.GetAllFilesAsync();
-            Console.WriteLine("Printing all files for the second time");
+            Debug.WriteLine("Printing all files for the second time");
             foreach (Google.Apis.Drive.v3.Data.File file in fileList)
             {
-                Console.WriteLine($"{file.Name}, {file.Id}");
+                Debug.WriteLine($"{file.Name}, {file.Id}");
             }
-            Console.WriteLine("Done printing all files for the second time");
+            Debug.WriteLine("Done printing all files for the second time");
         }
 
         private void CopySaveFilesFromInstallDir(SaveSpec saveSpec, string installDir, string destDir)
@@ -371,7 +371,7 @@ namespace SavegameSync
                 }
                 else
                 {
-                    Console.WriteLine("Skipping missing subpath " + subPath
+                    Debug.WriteLine("Skipping missing subpath " + subPath
                         + " while copying save files for " + saveSpec.GameName
                         + " out of install dir");
                 }
@@ -428,7 +428,7 @@ namespace SavegameSync
                 }
                 else
                 {
-                    Console.WriteLine("Skipping missing subpath " + subPath
+                    Debug.WriteLine("Skipping missing subpath " + subPath
                         + " while copying save files for " + saveSpec.GameName
                         + " into install dir");
                 }
