@@ -37,6 +37,7 @@ namespace SavegameSync
             savegameSync = SavegameSyncEngine.GetInstance();
             Debug.Assert(savegameSync.IsLoggedIn());
             await UpdateCloudGameList();
+            savegameListControl.Initialize();
             FinishOperation();
         }
 
@@ -45,6 +46,7 @@ namespace SavegameSync
             backButton.IsEnabled = false;
             deleteGameButton.IsEnabled = false;
             cloudGameListBox.IsEnabled = false;
+            savegameListControl.Disable();
         }
 
         private void FinishOperation()
@@ -52,6 +54,7 @@ namespace SavegameSync
             backButton.IsEnabled = true;
             deleteGameButton.IsEnabled = true;
             cloudGameListBox.IsEnabled = true;
+            savegameListControl.Enable();
         }
 
         private async Task UpdateCloudGameList()
@@ -98,6 +101,40 @@ namespace SavegameSync
                 await UpdateCloudGameList();
                 FinishOperation();
             }
+        }
+
+        private async void deleteSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            object selection = cloudGameListBox.SelectedItem;
+            if (selection == null)
+            {
+                return;
+            }
+            string gameName = selection.ToString();
+
+            int saveIndex = savegameListControl.GetSelectedSaveIndex();
+            if (saveIndex == -1)
+            {
+                return;
+            }
+
+            StartOperation();
+            await savegameSync.DeleteSave(gameName, saveIndex);
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
+            FinishOperation();
+        }
+
+        private async void cloudGameListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (e.AddedItems.Count == 0)
+            {
+                return;
+            }
+            Debug.Assert(e.AddedItems.Count == 1);
+
+            string gameName = e.AddedItems[0].ToString();
+
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
         }
     }
 }
