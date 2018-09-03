@@ -287,13 +287,35 @@ namespace SavegameSync
         /// </summary>
         public async Task DownloadOrphanedSaveFile(string saveFileName)
         {
-            FileUtils.DeleteIfExists(saveFileName);
+            await DownloadSaveFileToPathAsync(saveFileName, saveFileName);
+        }
+
+        public async Task DownloadSpecificSaveFileAsync(string gameName, int saveIndex)
+        {
+            await ReadSavegameList();
+            List<SavegameEntry> saves = savegameList.ReadSaves(gameName);
+            SavegameEntry save = saves[saveIndex];
+            string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(save.Guid);
+
+            string outputPath = GetSpecificSaveFileDownloadPath(gameName, saveIndex);
+            FileUtils.DeleteIfExists(outputPath);
+            await DownloadSaveFileToPathAsync(saveFileName, outputPath);
+        }
+
+        public string GetSpecificSaveFileDownloadPath(string gameName, int saveIndex)
+        {
+            return saveIndex + " - " + gameName + ".zip";
+        }
+
+        private async Task DownloadSaveFileToPathAsync(string saveFileName, string outputPath)
+        {
+            FileUtils.DeleteIfExists(outputPath);
 
             var files = await googleDriveWrapper.SearchFileByNameAsync(saveFileName);
             Debug.Assert(files.Count == 1);
             string fileId = files[0].Id;
 
-            using (FileStream outputStream = File.Open(saveFileName, FileMode.CreateNew))
+            using (FileStream outputStream = File.Open(outputPath, FileMode.CreateNew))
             {
                 await googleDriveWrapper.DownloadFileAsync(fileId, outputStream);
                 outputStream.Flush();

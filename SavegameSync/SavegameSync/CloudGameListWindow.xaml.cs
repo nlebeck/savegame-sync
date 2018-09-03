@@ -47,6 +47,7 @@ namespace SavegameSync
             deleteGameButton.IsEnabled = false;
             cloudGameListBox.IsEnabled = false;
             deleteSaveButton.IsEnabled = false;
+            downloadSaveButton.IsEnabled = false;
             savegameListControl.IsEnabled = false;
         }
 
@@ -56,6 +57,7 @@ namespace SavegameSync
             deleteGameButton.IsEnabled = true;
             cloudGameListBox.IsEnabled = true;
             deleteSaveButton.IsEnabled = true;
+            downloadSaveButton.IsEnabled = true;
             savegameListControl.IsEnabled = true;
         }
 
@@ -137,6 +139,36 @@ namespace SavegameSync
             string gameName = e.AddedItems[0].ToString();
 
             await savegameListControl.SetGameAndUpdateAsync(gameName);
+        }
+
+        private async void downloadSaveButton_Click(object sender, RoutedEventArgs e)
+        {
+            object selection = cloudGameListBox.SelectedItem;
+            if (selection == null)
+            {
+                return;
+            }
+            string gameName = selection.ToString();
+
+            int saveIndex = savegameListControl.GetSelectedSaveIndex();
+            if (saveIndex == -1)
+            {
+                return;
+            }
+
+            string downloadedFileName = savegameSync.GetSpecificSaveFileDownloadPath(gameName, saveIndex);
+            string message = "Download selected save? (The downloaded zip file will be downloaded"
+                + " into the directory in which this app was launched and will be named \""
+                + downloadedFileName + ".\")";
+            ConfirmationDialog dialog = new ConfirmationDialog(message);
+            bool? result = dialog.ShowDialog();
+
+            if (result.HasValue && result.GetValueOrDefault())
+            {
+                StartOperation();
+                await savegameSync.DownloadSpecificSaveFileAsync(gameName, saveIndex);
+                FinishOperation();
+            }
         }
     }
 }
