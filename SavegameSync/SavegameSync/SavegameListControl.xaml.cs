@@ -55,7 +55,7 @@ namespace SavegameSync
             savegameListBox.Items.Clear();
             for (int i = saves.Count - 1; i >= 0; i--)
             {
-                savegameListBox.Items.Add(saves[i].Timestamp);
+                savegameListBox.Items.Add(i + " - " + saves[i].Timestamp);
             }
             if (saves.Count == 0)
             {
