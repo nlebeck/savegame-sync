@@ -44,12 +44,26 @@ there would need to be some sort of timeout/abort mechanism.
 
 ## Limitations
 
-There are some limitations that I don't have any good ideas of how to solve.
+There are some limitations that I don't have plans to address at this time.
 
 1. Currently, this app uses the latest LastWriteTime of any file included in a
 save to determine the timestamp of the overall save. This method of calculating
 the timestamp works in most cases, but if the user only deletes some files and
 does not add or modify any files, the timestamp will be incorrect.
+
+2. When adding a game to your local game list, the app has no way of knowing if
+the install directory that you selected actually belongs to an installation of
+the game that you chose. One potential solution for verifying that the install
+directory matches the game would be to add some information to each game's
+SaveSpec about its expected install directory contents and check against that
+information when adding the game to the local game list.
+
+3. The app is currently unable to detect duplicate saves. Each save is treated
+as distinct, even if it is an exact copy of another save. We could detect
+duplicate saves by taking a hash of the zipped save directory or something, but
+then we would need to decide what policy to follow when a duplicate is
+detected. (Do we prevent the user from uploading a duplicate save? Or just
+display a warning message?)
 
 ## OneDrive bugs
 
