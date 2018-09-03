@@ -157,6 +157,8 @@ namespace SavegameSync
 
             // Upload SavegameList
             await WriteSavegameList();
+
+            CleanUpTempFiles();
         }
 
         public async Task DownloadAndUnzipSave(string gameName, int saveIndex)
@@ -191,6 +193,13 @@ namespace SavegameSync
             string installDir = localGameList.GetInstallDir(gameName);
             SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(gameName);
             CopySaveFilesIntoInstallDir(saveSpec, tempSaveDir, installDir);
+
+            CleanUpTempFiles();
+        }
+
+        private void CleanUpTempFiles()
+        {
+            FileUtils.DeleteIfExists(TempDir);
         }
 
         public async Task DeleteSave(string gameName, int saveIndex)
