@@ -256,6 +256,7 @@ namespace SavegameSync
                 StartOperation("Deleting game from local game list...");
                 await savegameSync.DeleteLocalGame(gameName);
                 UpdateLocalGameList();
+                await savegameListControl.SetGameAndUpdateAsync(null);
                 UpdateLocalGameInfoDisplays(null);
                 FinishOperation();
             }

@@ -103,6 +103,7 @@ namespace SavegameSync
                 StartOperation();
                 await savegameSync.DeleteGameFromCloud(gameName);
                 await UpdateCloudGameList();
+                await savegameListControl.SetGameAndUpdateAsync(null);
                 FinishOperation();
             }
         }

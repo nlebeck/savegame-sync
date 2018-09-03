@@ -48,6 +48,12 @@ namespace SavegameSync
         public async Task SetGameAndUpdateAsync(string gameName)
         {
             savegameListBox.Items.Clear();
+
+            if (gameName == null)
+            {
+                return;
+            }
+
             savegameListBox.Items.Add("Loading...");
             currentGameTextBlock.Text = gameName;
 
