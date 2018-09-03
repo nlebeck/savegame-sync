@@ -15,6 +15,8 @@ namespace SavegameSync
         private const string SavegameListFileName = "savegame-list.txt";
         private const string LocalGameListFileName = "local-game-list.txt";
 
+        private const string TempDir = "temp";
+
         private static SavegameSyncEngine singleton;
 
         private GoogleDriveWrapper googleDriveWrapper;
@@ -122,7 +124,7 @@ namespace SavegameSync
             // to the spec
             string installDir = localGameList.GetInstallDir(gameName);
             SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(gameName);
-            string destDir = @"C:\Users\niell\Git\savegame-sync\tempUpload\temp";
+            string destDir = Path.Combine(TempDir, "saveToUpload");
             FileUtils.DeleteIfExists(destDir);
             Directory.CreateDirectory(destDir);
             CopySaveFilesFromInstallDir(saveSpec, installDir, destDir);
@@ -135,7 +137,7 @@ namespace SavegameSync
             // Assign the save a guid and make it into a zip file
             Guid saveGuid = Guid.NewGuid();
             Debug.WriteLine("Guid: " + saveGuid);
-            string zipFile = @"C:\Users\niell\Git\savegame-sync\tempUpload\" + saveGuid + ".zip";
+            string zipFile = Path.Combine(TempDir, SavegameSyncUtils.GetSavegameFileNameFromGuid(saveGuid));
             FileUtils.DeleteIfExists(zipFile);
             ZipFile.CreateFromDirectory(destDir, zipFile);
 
@@ -173,16 +175,15 @@ namespace SavegameSync
             var files = await googleDriveWrapper.SearchFileByNameAsync(saveFileName);
             Debug.Assert(files.Count == 1);
             string saveFileId = files[0].Id;
-            string tempDir = @"C:\Users\niell\Git\savegame-sync\tempDownload\";
-            string zipFilePath = Path.Combine(tempDir, saveFileName);
-            Directory.CreateDirectory(tempDir);
+            string zipFilePath = Path.Combine(TempDir, saveFileName);
+            Directory.CreateDirectory(TempDir);
             using (FileStream fileStream = File.OpenWrite(zipFilePath))
             {
                 await googleDriveWrapper.DownloadFileAsync(saveFileId, fileStream);
             }
 
             // Unzip zipped save
-            string tempSaveDir = Path.Combine(tempDir, "temp");
+            string tempSaveDir = Path.Combine(TempDir, "downloadedSave");
             FileUtils.DeleteIfExists(tempSaveDir);
             ZipFile.ExtractToDirectory(zipFilePath, tempSaveDir);
 
