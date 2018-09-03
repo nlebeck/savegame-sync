@@ -16,15 +16,16 @@ using System.Windows.Shapes;
 namespace SavegameSync
 {
     /// <summary>
-    /// Interaction logic for OrphanedSaveWindow.xaml
+    /// Interaction logic for RepairFilesWindow.xaml
     /// </summary>
-    public partial class OrphanedSaveWindow : Window
+    public partial class RepairFilesWindow : Window
     {
-        private const string EMPTY_LIST_MESSAGE = "(No orphaned save files found.)";
+        private const string EMPTY_ORPHANED_LIST_MESSAGE = "(No orphaned save files found.)";
+        private const string EMPTY_MISSING_ENTRY_LIST_MESSAGE = "(No missing savegame entries found.)";
 
         SavegameSyncEngine savegameSync;
 
-        public OrphanedSaveWindow()
+        public RepairFilesWindow()
         {
             InitializeComponent();
         }
@@ -37,6 +38,7 @@ namespace SavegameSync
             savegameSync = SavegameSyncEngine.GetInstance();
             Debug.Assert(savegameSync.IsLoggedIn());
             await UpdateOrphanedSaveList();
+            await UpdateMissingEntriesListAsync();
             FinishOperation();
         }
 
@@ -45,6 +47,9 @@ namespace SavegameSync
             downloadSaveButton.IsEnabled = false;
             deleteSaveButton.IsEnabled = false;
             orphanedSaveListBox.IsEnabled = false;
+            backButton.IsEnabled = false;
+            missingEntriesListBox.IsEnabled = false;
+            deleteMissingEntriesButton.IsEnabled = false;
         }
 
         private void FinishOperation()
@@ -52,6 +57,9 @@ namespace SavegameSync
             downloadSaveButton.IsEnabled = true;
             deleteSaveButton.IsEnabled = true;
             orphanedSaveListBox.IsEnabled = true;
+            backButton.IsEnabled = true;
+            missingEntriesListBox.IsEnabled = true;
+            deleteMissingEntriesButton.IsEnabled = true;
         }
 
         private async Task UpdateOrphanedSaveList()
@@ -64,7 +72,24 @@ namespace SavegameSync
             }
             if (orphanedSaveFileNames.Count == 0)
             {
-                orphanedSaveListBox.Items.Add(EMPTY_LIST_MESSAGE);
+                orphanedSaveListBox.Items.Add(EMPTY_ORPHANED_LIST_MESSAGE);
+            }
+        }
+
+        private async Task UpdateMissingEntriesListAsync()
+        {
+            missingEntriesListBox.Items.Clear();
+            Dictionary<string, List<SavegameEntry>> missingEntries = await savegameSync.GetMissingSaveEntriesAsync();
+            foreach (string gameName in missingEntries.Keys)
+            {
+                foreach (SavegameEntry save in missingEntries[gameName])
+                {
+                    missingEntriesListBox.Items.Add(save.Timestamp + " - " + gameName);
+                }
+            }
+            if (missingEntries.Keys.Count == 0)
+            {
+                missingEntriesListBox.Items.Add(EMPTY_MISSING_ENTRY_LIST_MESSAGE);
             }
         }
 
@@ -76,7 +101,7 @@ namespace SavegameSync
                 return;
             }
             string saveFileName = selection.ToString();
-            if (saveFileName == EMPTY_LIST_MESSAGE)
+            if (saveFileName == EMPTY_ORPHANED_LIST_MESSAGE)
             {
                 return;
             }
@@ -102,7 +127,7 @@ namespace SavegameSync
                 return;
             }
             string saveFileName = selection.ToString();
-            if (saveFileName == EMPTY_LIST_MESSAGE)
+            if (saveFileName == EMPTY_ORPHANED_LIST_MESSAGE)
             {
                 return;
             }
@@ -117,6 +142,14 @@ namespace SavegameSync
                 await savegameSync.DownloadOrphanedSaveFile(saveFileName);
                 FinishOperation();
             }
+        }
+
+        private async void deleteMissingEntriesButton_Click(object sender, RoutedEventArgs e)
+        {
+            StartOperation();
+            await savegameSync.DeleteMissingSaveEntriesAsync();
+            await UpdateMissingEntriesListAsync();
+            FinishOperation();
         }
     }
 }

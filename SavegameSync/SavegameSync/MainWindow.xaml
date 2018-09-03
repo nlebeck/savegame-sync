@@ -20,7 +20,7 @@
         <TextBlock x:Name="localSaveTimestampTextBlock" HorizontalAlignment="Left" Margin="298,326,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="243"/>
         <Button x:Name="cloudGameListButton" Content="View games in cloud storage" HorizontalAlignment="Left" Margin="614,55,0,0" VerticalAlignment="Top" Width="160" Click="cloudGameListButton_Click"/>
         <Button x:Name="deleteLocalGameButton" Content="Delete game" HorizontalAlignment="Left" Margin="254,45,0,0" VerticalAlignment="Top" Width="75" Height="23" Click="deleteLocalGameButton_Click"/>
-        <Button x:Name="orphanedSaveButton" Content="View orphaned save files" HorizontalAlignment="Left" Margin="632,80,0,0" VerticalAlignment="Top" Width="142" Click="orphanedSaveButton_Click"/>
+        <Button x:Name="orphanedSaveButton" Content="Repair cloud files" HorizontalAlignment="Left" Margin="676,80,0,0" VerticalAlignment="Top" Width="98" Click="orphanedSaveButton_Click"/>
         <local:SavegameListControl x:Name="savegameListControl" HorizontalAlignment="Left" Margin="375,17,0,0" VerticalAlignment="Top"/>
         <TextBlock x:Name="installDirLabelTextBlock" HorizontalAlignment="Left" Margin="35,347,0,0" TextWrapping="Wrap" Text="Install dir of selected game:" VerticalAlignment="Top"/>
         <TextBlock x:Name="installDirTextBlock" HorizontalAlignment="Left" Margin="194,347,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="356" Height="59"/>

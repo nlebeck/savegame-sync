@@ -264,7 +264,7 @@ namespace SavegameSync
 
         private void orphanedSaveButton_Click(object sender, RoutedEventArgs e)
         {
-            OrphanedSaveWindow window = new OrphanedSaveWindow();
+            RepairFilesWindow window = new RepairFilesWindow();
             window.Show();
             Close();
         }

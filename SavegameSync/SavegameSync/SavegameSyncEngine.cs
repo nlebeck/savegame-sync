@@ -240,6 +240,53 @@ namespace SavegameSync
             }
         }
 
+        public async Task<Dictionary<string, List<SavegameEntry>>> GetMissingSaveEntriesAsync()
+        {
+            Dictionary<string, List<SavegameEntry>> result = new Dictionary<string, List<SavegameEntry>>();
+
+            await ReadSavegameList();
+            foreach (string gameName in savegameList.GetGames())
+            {
+                List<SavegameEntry> saves = savegameList.ReadSaves(gameName);
+                foreach (SavegameEntry save in saves)
+                {
+                    string saveFileName = SavegameSyncUtils.GetSavegameFileNameFromGuid(save.Guid);
+                    List<Google.Apis.Drive.v3.Data.File> files = await googleDriveWrapper.SearchFileByNameAsync(saveFileName);
+                    Debug.Assert(files.Count <= 1);
+                    if (files.Count == 0)
+                    {
+                        if (!result.ContainsKey(gameName))
+                        {
+                            result.Add(gameName, new List<SavegameEntry>());
+                        }
+                        result[gameName].Add(save);
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        public async Task DeleteMissingSaveEntriesAsync()
+        {
+            // We don't need to read the SavegameList, since GetMissingSaveEntriesAsync() will take
+            // care of that for us.
+            //
+            // TODO: read and write the SavegameList in a more principled way, to prevent methods
+            // like this one from breaking if the implementation of another method changes?
+
+            Dictionary<string, List<SavegameEntry>> missingEntries = await GetMissingSaveEntriesAsync();
+            foreach (string gameName in missingEntries.Keys)
+            {
+                foreach (SavegameEntry entry in missingEntries[gameName])
+                {
+                    savegameList.DeleteSave(gameName, entry.Guid);
+                }
+            }
+
+            await WriteSavegameList();
+        }
+
         public async Task<List<string>> GetOrphanedSaveFileNames()
         {
             List<string> orphanedSaveFileNames = new List<string>();
