@@ -1,19 +1,83 @@
-# savegame-sync
+# SavegameSync
 
-A utility to synchronize savegame files for PC games using Google Drive.
+SavegameSync is an app for synchronizing and storing PC game save files in the
+cloud. The app maintains cloud saves in the user's Google Drive account and
+provides a simple interface for uploading and downloading saves.
 
-## Goal
+SavegameSync provides somewhat similar functionality to Steam Cloud or GOG's
+cloud save feature, with a few key differences:
 
-The goal of this project is to make a lightweight application that allows users
-to easily synchronize their savegame files for PC games. This app maintains
-cloud saves in a user's Google Drive account and provides a simple interface
-for uploading and downloading saves.
+1. Unlike Steam Cloud and GOG's automatic synchronization, SavegameSync
+provides a more granular, manual interface for managing save files.
+SavegameSync only uploads and downloads files when instructed to by the user,
+supports storing multiple cloud saves for each game, and lets the user choose
+which cloud save to download.
+
+2. SavegameSync can be extended to support any game by defining a custom
+"SaveSpec" for that game. Currently, adding a SaveSpec for a new game requires
+modifying a source file and recompiling the app, but it shouldn't be too hard
+to modify the app to support loading SaveSpecs from XML or JSON files.
 
 Originally, I intended this app to be used for GOG games, but since I started
 working on it, GOG implemented its own cloud save feature. There are still some
 GOG games that don't support cloud saves, though (and maybe some Steam games
 too?), so I'm hoping it will still be a useful app. In any case, it has been
 fun to make.
+
+SavegameSync is not production-ready! If you want to use this app to
+synchronize save data that you care about, please make other backups of that
+data occasionally.
+
+## Instructions
+
+SavegameSync's save file synchronization functionality is split across a few
+different windows. Here's how to use the different windows to manage your
+saves:
+
+### Main window
+
+When the app first opens, you'll see the main window. The main window is where
+you do most of your uploading and downloading. The main window shows a list of
+"local games" (games that you have installed on the running computer) on the
+left, and if you select a game, it will show the list of cloud saves for that
+game on the right.
+
+To add a game, click the "add game" button. You'll need to first select the
+game's install directory and then choose the game's name from a list (the list
+shows the names of all games with defined SaveSpecs).
+
+Once you've added a game, you can upload saves to the cloud, download saves
+from the cloud, and delete saves in the cloud for that game using the
+appropriate buttons. Each cloud save shows the timestamp at which its files
+were last modified, and the app also shows you the timestamp of your local save
+files for the game.
+
+### Cloud game list window
+
+The cloud game list window, accessed by clicking the "view games in cloud
+storage" button, lets you view any game for which you have cloud saves. You can
+download and delete individual saves or delete all saves for the game from the
+cloud. This window lets you manage your cloud data even if you don't have
+copies of all your games installed on your local computer.
+
+### Repair files window
+
+This window lets you deal with error states that can arise due to Google Drive
+errors, connection issues, or other unexpected circumstances. In general, there
+are two types of error cases: a save file can end up missing from the master
+"savegame list" but still have the actual file present in Google Drive, or the
+actual file might disappear while the save's entry remains in the savegame
+list. The "orphaned saves" list on the left side of the window shows saves that
+wound up in the first state, while the list on the right side of the window
+shows saves in the second state. If a save is orphaned, you can still recover
+the actual file using the "download save" button, but for saves whose files are
+missing but that have entries present in the savegame list, the only thing to
+be done is to delete those entries from the savegame list.
+
+This window also has options to download or delete all of the files stored in
+SavegameSync's Google Drive app folder. These options are mostly provided for
+convenience, but they might come in handy for troubleshooting problems or for
+recovering your save data in the case of catastrophic file corruption.
 
 ## Google APIs client setup
 
