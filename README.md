@@ -26,7 +26,10 @@ fun to make.
 
 SavegameSync is not production-ready! If you want to use this app to
 synchronize save data that you care about, please make other backups of that
-data occasionally.
+data occasionally. I think data loss is unlikely, and the app has features for
+recovering from data corruption, but I don't know enough about the Google Drive
+API's failure modes to make any confident claims of what's possible or not
+possible when using this app.
 
 ## Instructions
 
@@ -108,8 +111,8 @@ client secret.
 
 ## Future work
 
-This project is pretty close to being complete, but there are a few more things
-I want to take care of before I declare it finished.
+These are some things that could be done to make this app more robust and
+polished, arranged roughly in order of hardest to easiest:
 
 1. Error handling: right now, this app is not very robust to errors, whether
 they're caused by Google Drive request failures, unexpected states in the local
@@ -132,6 +135,21 @@ released when finishing the operation. Of course, then there are problems that
 could arise if one instance of the app grabs the lock but then fails to release
 the lock due to a crash/premature exit/Google Drive connection failure, so
 there would need to be some sort of timeout/abort mechanism.
+
+3. Currently, adding SaveSpecs requires modifying the `SaveSpecRepository.cs`
+source file and recompiling the app. I want to change the SaveSpecRepository to
+read SaveSpecs from an XML or JSON file (or multiple files) that could be
+modified independently by users. I should also add documentation on how to
+define custom SaveSpecs to this README.
+
+4. Right now, all timestamps show up in UTC. This is probably confusing for
+users, so it would be good to have the timestamps show up in the user's current
+time zone (or let the user set the time zone).
+
+5. I've mostly just tested this app with one real game (Medal of Honor: Allied
+Assault) and various forms of hand-crafted dummy data. It would be good to test
+this app with a variety of different games, to make sure the SaveSpec format is
+flexible enough to handle different save file layouts.
 
 ## Limitations
 
