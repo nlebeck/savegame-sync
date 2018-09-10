@@ -48,17 +48,6 @@ namespace SavegameSync
             return googleDriveWrapper != null;
         }
 
-        public async Task DebugPrintSavegameListFile()
-        {
-            await ReadSavegameList();
-            savegameList.DebugPrintGameNames();
-            foreach (string game in savegameList.GetGames())
-            {
-                savegameList.DebugPrintSaves(game);
-            }
-            await WriteSavegameList();
-        }
-
         public async Task ReadLocalGameList()
         {
             localGameList = new LocalGameList();
@@ -100,22 +89,6 @@ namespace SavegameSync
         {
             await ReadSavegameList();
             return savegameList.ReadSaves(gameName);
-        }
-
-        public async Task DebugPrintLocalGameListFile()
-        {
-            await ReadLocalGameList();
-            localGameList.DebugPrintGames();
-        }
-
-        public async Task DebugAddNonexistentLocalGame()
-        {
-            await ReadLocalGameList();
-            if (!localGameList.ContainsGame("MadeUpGame"))
-            {
-                await AddLocalGame("MadeUpGame", "C:\\Games\\MadeUpGame");
-            }
-            await WriteLocalGameList();
         }
 
         public async Task ZipAndUploadSave(string gameName)
@@ -388,69 +361,6 @@ namespace SavegameSync
             await googleDriveWrapper.DeleteAllFilesAsync();
         }
 
-        public async Task DebugPrintAllFiles()
-        {
-            // Print all files in the Google Drive app folder
-            Debug.WriteLine("Listing all files: ");
-            var files = await googleDriveWrapper.GetAllFilesAsync();
-            for (int i = 0; i < files.Count; i++)
-            {
-                Debug.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
-            }
-            Debug.WriteLine("Done listing all files");
-        }
-
-        public async Task DebugZipAndUploadSave()
-        {
-            // Wipe Google Drive app folder
-            await googleDriveWrapper.DeleteAllFilesAsync();
-
-            await ZipAndUploadSave("Medal of Honor Allied Assault War Chest");
-
-            // Print data from the local copy of the savegameList
-            savegameList.DebugPrintGameNames();
-            savegameList.DebugPrintSaves("Medal of Honor Allied Assault War Chest");
-
-            await DebugPrintAllFiles();
-        }
-
-        public async Task DebugDownloadAndUnzipSave()
-        {
-            await DownloadAndUnzipSave("Medal of Honor Allied Assault War Chest", 0);
-        }
-
-        public async Task DebugGoogleDriveFunctions()
-        {
-            List<string> dummyFileIds = new List<string>();
-            for (int i = 0; i < 20; i++)
-            {
-                Debug.WriteLine("Creating dummy file " + i);
-                dummyFileIds.Add(await googleDriveWrapper.CreateFileAsync("DummyFile" + i));
-            }
-
-            var fileList = await googleDriveWrapper.GetAllFilesAsync();
-            Debug.WriteLine("Printing all files for the first time");
-            foreach (Google.Apis.Drive.v3.Data.File file in fileList)
-            {
-                Debug.WriteLine($"{file.Name}, {file.Id}");
-            }
-            Debug.WriteLine("Done printing all files for the first time");
-
-            for (int i = 0; i < dummyFileIds.Count; i++)
-            {
-                Debug.WriteLine("Deleting dummy file " + i);
-                await googleDriveWrapper.DeleteFileAsync(dummyFileIds[i]);
-            }
-
-            fileList = await googleDriveWrapper.GetAllFilesAsync();
-            Debug.WriteLine("Printing all files for the second time");
-            foreach (Google.Apis.Drive.v3.Data.File file in fileList)
-            {
-                Debug.WriteLine($"{file.Name}, {file.Id}");
-            }
-            Debug.WriteLine("Done printing all files for the second time");
-        }
-
         private void CopySaveFilesFromInstallDir(SaveSpec saveSpec, string installDir, string destDir)
         {
             FileUtils.DeleteIfExists(destDir);
@@ -610,6 +520,96 @@ namespace SavegameSync
             await savegameList.WriteToStream(stream);
             await googleDriveWrapper.UploadFileAsync(fileId, stream);
             stream.Close();
+        }
+
+        public async Task DebugPrintSavegameListFile()
+        {
+            await ReadSavegameList();
+            savegameList.DebugPrintGameNames();
+            foreach (string game in savegameList.GetGames())
+            {
+                savegameList.DebugPrintSaves(game);
+            }
+            await WriteSavegameList();
+        }
+
+        public async Task DebugPrintLocalGameListFile()
+        {
+            await ReadLocalGameList();
+            localGameList.DebugPrintGames();
+        }
+
+        public async Task DebugAddNonexistentLocalGame()
+        {
+            await ReadLocalGameList();
+            if (!localGameList.ContainsGame("MadeUpGame"))
+            {
+                await AddLocalGame("MadeUpGame", "C:\\Games\\MadeUpGame");
+            }
+            await WriteLocalGameList();
+        }
+
+        public async Task DebugPrintAllFiles()
+        {
+            // Print all files in the Google Drive app folder
+            Debug.WriteLine("Listing all files: ");
+            var files = await googleDriveWrapper.GetAllFilesAsync();
+            for (int i = 0; i < files.Count; i++)
+            {
+                Debug.WriteLine(string.Format("{0}, {1}, {2}", i, files[i].Name, files[i].Size));
+            }
+            Debug.WriteLine("Done listing all files");
+        }
+
+        public async Task DebugZipAndUploadSave()
+        {
+            // Wipe Google Drive app folder
+            await googleDriveWrapper.DeleteAllFilesAsync();
+
+            await ZipAndUploadSave("Medal of Honor Allied Assault War Chest");
+
+            // Print data from the local copy of the savegameList
+            savegameList.DebugPrintGameNames();
+            savegameList.DebugPrintSaves("Medal of Honor Allied Assault War Chest");
+
+            await DebugPrintAllFiles();
+        }
+
+        public async Task DebugDownloadAndUnzipSave()
+        {
+            await DownloadAndUnzipSave("Medal of Honor Allied Assault War Chest", 0);
+        }
+
+        public async Task DebugGoogleDriveFunctions()
+        {
+            List<string> dummyFileIds = new List<string>();
+            for (int i = 0; i < 20; i++)
+            {
+                Debug.WriteLine("Creating dummy file " + i);
+                dummyFileIds.Add(await googleDriveWrapper.CreateFileAsync("DummyFile" + i));
+            }
+
+            var fileList = await googleDriveWrapper.GetAllFilesAsync();
+            Debug.WriteLine("Printing all files for the first time");
+            foreach (Google.Apis.Drive.v3.Data.File file in fileList)
+            {
+                Debug.WriteLine($"{file.Name}, {file.Id}");
+            }
+            Debug.WriteLine("Done printing all files for the first time");
+
+            for (int i = 0; i < dummyFileIds.Count; i++)
+            {
+                Debug.WriteLine("Deleting dummy file " + i);
+                await googleDriveWrapper.DeleteFileAsync(dummyFileIds[i]);
+            }
+
+            fileList = await googleDriveWrapper.GetAllFilesAsync();
+            Debug.WriteLine("Printing all files for the second time");
+            foreach (Google.Apis.Drive.v3.Data.File file in fileList)
+            {
+                Debug.WriteLine($"{file.Name}, {file.Id}");
+            }
+            Debug.WriteLine("Done printing all files for the second time");
         }
 
         private async Task DebugCheckFileDownloadUpload(string fileId)
