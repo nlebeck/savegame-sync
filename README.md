@@ -146,7 +146,14 @@ define custom SaveSpecs to this README.
 users, so it would be good to have the timestamps show up in the user's current
 time zone (or let the user set the time zone).
 
-5. I've mostly just tested this app with one real game (Medal of Honor: Allied
+5. Currently, when you use the app to manually download files from the cloud
+instead of synchronizing with a specific locally installed game (e.g., from the
+cloud game list window or the repair files window), the app just dumps the
+downloaded files in the directory from which the app was launched. It would be
+good to give the user a file picker and let the user choose where to put
+downloaded files.
+
+6. I've mostly just tested this app with one real game (Medal of Honor: Allied
 Assault) and various forms of hand-crafted dummy data. It would be good to test
 this app with a variety of different games, to make sure the SaveSpec format is
 flexible enough to handle different save file layouts.

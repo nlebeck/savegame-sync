@@ -29,7 +29,6 @@ namespace SavegameSync
             {
                 listBox.Items.Add(spec.GameName);
             }
-            listBox.Items.Add("Testing");
         }
 
         private void OK_Button_Click(object sender, RoutedEventArgs e)
