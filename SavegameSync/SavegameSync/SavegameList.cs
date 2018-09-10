@@ -32,8 +32,12 @@ namespace SavegameSync
     }
 
     /// <summary>
-    /// Stores a queue of savegame entries for each game, indexed by game name.
+    /// Stores a list of savegame entries for each game, indexed by game name.
     /// </summary>
+    /// <remarks>
+    /// The current name of this class might be a little confusing, since it's not a single
+    /// savegame list, but rather a collection of per-game savegame lists.
+    /// </remarks>
     public class SavegameList
     {
         private Dictionary<string, List<SavegameEntry>> gameEntries =
