@@ -369,6 +369,25 @@ namespace SavegameSync
             }
         }
 
+        public async Task DownloadAllFilesToDirectoryAsync(string directoryPath)
+        {
+            var filesList = await googleDriveWrapper.GetAllFilesAsync();
+            foreach (var file in filesList)
+            {
+                string filePath = Path.Combine(directoryPath, file.Name);
+                using (FileStream outputStream = File.Open(filePath, FileMode.CreateNew))
+                {
+                    await googleDriveWrapper.DownloadFileAsync(file.Id, outputStream);
+                }
+            }
+        }
+
+        public async Task DeleteAllFilesAsync()
+        {
+            savegameListFileId = null;
+            await googleDriveWrapper.DeleteAllFilesAsync();
+        }
+
         public async Task DebugPrintAllFiles()
         {
             // Print all files in the Google Drive app folder

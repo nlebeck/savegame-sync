@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,6 +52,8 @@ namespace SavegameSync
             backButton.IsEnabled = false;
             missingEntriesListBox.IsEnabled = false;
             deleteMissingEntriesButton.IsEnabled = false;
+            downloadAllFilesButton.IsEnabled = false;
+            deleteAllFilesButton.IsEnabled = false;
         }
 
         private void FinishOperation()
@@ -60,6 +64,8 @@ namespace SavegameSync
             backButton.IsEnabled = true;
             missingEntriesListBox.IsEnabled = true;
             deleteMissingEntriesButton.IsEnabled = true;
+            downloadAllFilesButton.IsEnabled = true;
+            deleteAllFilesButton.IsEnabled = true;
         }
 
         private async Task UpdateOrphanedSaveList()
@@ -148,6 +154,50 @@ namespace SavegameSync
         {
             StartOperation();
             await savegameSync.DeleteMissingSaveEntriesAsync();
+            await UpdateMissingEntriesListAsync();
+            FinishOperation();
+        }
+
+        private async void downloadAllFilesButton_Click(object sender, RoutedEventArgs e)
+        {
+            string directoryName = $"SavegameSync-all-files-{DateTime.Now.Day}-{DateTime.Now.Month}-{DateTime.Now.Year}-{DateTime.Now.Hour}-{DateTime.Now.Minute}-{DateTime.Now.Second}";
+
+            string message = "Download all files? The files will be downloaded into a directory"
+                           + " named " + directoryName + " located in the directory in which this"
+                           + " app was launched.";
+
+            ConfirmationDialog dialog = new ConfirmationDialog(message);
+            bool? result = dialog.ShowDialog();
+            if (result.HasValue && result.Value)
+            {
+                StartOperation();
+                Directory.CreateDirectory(directoryName);
+                await savegameSync.DownloadAllFilesToDirectoryAsync(directoryName);
+                FinishOperation();
+            }
+        }
+
+        private async void deleteAllFilesButton_Click(object sender, RoutedEventArgs e)
+        {
+            string message = "Delete all files stored in the cloud?";
+            ConfirmationDialog dialog = new ConfirmationDialog(message);
+            bool? result = dialog.ShowDialog();
+            if (!result.HasValue || !result.Value)
+            {
+                return;
+            }
+
+            string message2 = "Are you sure you want to delete all files? (All your cloud saves will be lost!)";
+            ConfirmationDialog dialog2 = new ConfirmationDialog(message2);
+            bool? result2 = dialog2.ShowDialog();
+            if (!result2.HasValue || !result2.Value)
+            {
+                return;
+            }
+
+            StartOperation();
+            await savegameSync.DeleteAllFilesAsync();
+            await UpdateOrphanedSaveList();
             await UpdateMissingEntriesListAsync();
             FinishOperation();
         }
