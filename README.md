@@ -15,6 +15,33 @@ GOG games that don't support cloud saves, though (and maybe some Steam games
 too?), so I'm hoping it will still be a useful app. In any case, it has been
 fun to make.
 
+## Google APIs client setup
+
+This app needs to have the client secret of a Google APIs app in order to
+upload and download data from its Google Drive app folder on the user's
+account. I've created a SavegameSync Google APIs project, but from what I can
+tell, there's no good way to package a client secret with a client application
+that will be distributed directly to users -- there's always the risk that
+malicious users could extract the client secret from the binary and use it to
+let arbitrary apps spoof the SavegameSync app. As a result, I think the best
+way to run this app right now is to create your own Google APIs project, create
+a client secret for it, and use that client secret to run SavegameSync. Here's
+the procedure for doing that:
+
+1. Go to the [Google APIs Console](https://console.developers.google.com/apis/)
+and create a new project.
+
+2. Go to the Credentials tab and click "Create credentials." Select the "OAuth
+client ID" option.
+
+3. In the "OAuth 2.0 client IDs" list, click on the entry that you created,
+then click the "Download JSON" button to download a JSON file containing the
+client secret.
+
+4. Copy that JSON file into the SavegameSync project folder
+(`SavegameSync\SavegameSync` from the repo root) and rename it
+`google-drive-client-secret.json`.
+
 ## Future work
 
 This project is pretty close to being complete, but there are a few more things
