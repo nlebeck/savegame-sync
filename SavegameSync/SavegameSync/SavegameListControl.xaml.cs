@@ -57,7 +57,28 @@ namespace SavegameSync
             savegameListBox.Items.Add("Loading...");
             currentGameTextBlock.Text = gameName;
 
-            List<SavegameEntry> saves = await savegameSync.ReadSaves(gameName);
+            List<SavegameEntry> saves = new List<SavegameEntry>();
+            try
+            {
+                saves = await savegameSync.ReadSaves(gameName);
+            }
+            catch (SavegameSyncException e)
+            {
+                savegameListBox.Items.Clear();
+                savegameListBox.Items.Add("Error reading saves:");
+                savegameListBox.Items.Add(e.Message);
+                return;
+            }
+            catch (Exception e)
+            {
+                savegameListBox.Items.Clear();
+                savegameListBox.Items.Add("Exception thrown while reading saves:");
+                savegameListBox.Items.Add(e.GetType());
+                savegameListBox.Items.Add(e.Message);
+                return;
+            }
+
+
             savegameListBox.Items.Clear();
             for (int i = saves.Count - 1; i >= 0; i--)
             {

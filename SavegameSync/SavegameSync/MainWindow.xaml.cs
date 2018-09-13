@@ -42,6 +42,30 @@ namespace SavegameSync
             FinishOperation();
         }
 
+        private delegate Task Operation();
+
+        private async Task PerformOperationChecked(string message, Operation op)
+        {
+            StartOperation(message);
+            try
+            {
+                await op();
+            }
+            catch (SavegameSyncException se)
+            {
+                string dialogText = "Error encountered while performing operation: " + se.Message;
+                InformationDialog dialog = new InformationDialog(dialogText);
+                dialog.ShowDialog();
+            }
+            catch (Exception e)
+            {
+                string dialogText = $"Exception of type {e.GetType()} thrown: {e.Message}";
+                InformationDialog dialog = new InformationDialog(dialogText);
+                dialog.ShowDialog();
+            }
+            FinishOperation();
+        }
+
         private void UpdateLocalGameList()
         {
             localGameListBox.Items.Clear();
@@ -107,25 +131,30 @@ namespace SavegameSync
             }
 
             string timestampMessage = null;
-            string installDir = savegameSync.GetLocalInstallDir(selectedGameName);
-            SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(selectedGameName);
-            if (installDir == null)
+            string installDir = null;
+            try
+            {
+                installDir = savegameSync.GetLocalInstallDir(selectedGameName);
+                SaveSpec saveSpec = SaveSpecRepository.GetRepository().GetSaveSpec(selectedGameName);
+                if (!Directory.Exists(installDir))
+                {
+                    timestampMessage = "Error: install dir does not exist";
+                }
+                else
+                {
+                    DateTime timestamp = savegameSync.GetLocalSaveTimestamp(saveSpec, installDir);
+                    timestampMessage = timestamp.ToString();
+                }
+            }
+            catch (NotInLocalGameListException)
             {
                 timestampMessage = "Error: game not in local game list";
             }
-            else if (saveSpec == null)
+            catch (SaveSpecMissingException)
             {
                 timestampMessage = "Error: save spec not found";
             }
-            else if (!Directory.Exists(installDir))
-            {
-                timestampMessage = "Error: install dir does not exist";
-            }
-            else
-            {
-                DateTime timestamp = savegameSync.GetLocalSaveTimestamp(saveSpec, installDir);
-                timestampMessage = timestamp.ToString();
-            }
+
             localSaveTimestampTextBlock.Text = timestampMessage;
             installDirTextBlock.Text = installDir;
         }
@@ -138,10 +167,11 @@ namespace SavegameSync
                 return;
             }
             string gameName = selectedGame.ToString();
-            StartOperation("Uploading save for " + gameName + "...");
-            await savegameSync.ZipAndUploadSave(gameName);
-            await savegameListControl.SetGameAndUpdateAsync(gameName);
-            FinishOperation();
+            await PerformOperationChecked("Uploading save for " + gameName + "...", async () =>
+            {
+                await savegameSync.ZipAndUploadSave(gameName);
+                await savegameListControl.SetGameAndUpdateAsync(gameName);
+            });
         }
 
         private void StartOperation(string message)
@@ -189,10 +219,11 @@ namespace SavegameSync
                 return;
             }
 
-            StartOperation("Downloading save for " + gameName + "...");
-            await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
-            UpdateLocalGameInfoDisplays(gameName);
-            FinishOperation();
+            await PerformOperationChecked("Downloading save for " + gameName + "...", async () =>
+            {
+                await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
+                UpdateLocalGameInfoDisplays(gameName);
+            });
         }
 
         private async void deleteCloudSaveButton_Click(object sender, RoutedEventArgs e)
@@ -210,10 +241,11 @@ namespace SavegameSync
                 return;
             }
 
-            StartOperation("Deleting cloud save for " + gameName + "...");
-            await savegameSync.DeleteSave(gameName, saveIndex);
-            await savegameListControl.SetGameAndUpdateAsync(gameName);
-            FinishOperation();
+            await PerformOperationChecked("Deleting cloud save for " + gameName + "...", async () =>
+            {
+                await savegameSync.DeleteSave(gameName, saveIndex);
+                await savegameListControl.SetGameAndUpdateAsync(gameName);
+            });
         }
 
         private async void debugButton_Click(object sender, RoutedEventArgs e)
@@ -253,12 +285,13 @@ namespace SavegameSync
             bool? result = dialog.ShowDialog();
             if (result.HasValue && result.GetValueOrDefault())
             {
-                StartOperation("Deleting game from local game list...");
-                await savegameSync.DeleteLocalGame(gameName);
-                UpdateLocalGameList();
-                await savegameListControl.SetGameAndUpdateAsync(null);
-                UpdateLocalGameInfoDisplays(null);
-                FinishOperation();
+                await PerformOperationChecked("Deleting game from local game list...", async () =>
+                {
+                    await savegameSync.DeleteLocalGame(gameName);
+                    UpdateLocalGameList();
+                    await savegameListControl.SetGameAndUpdateAsync(null);
+                    UpdateLocalGameInfoDisplays(null);
+                });
             }
         }
 

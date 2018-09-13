@@ -49,7 +49,7 @@ namespace SavegameSync
         {
             if (!gameInstallDirs.ContainsKey(gameName))
             {
-                return null;
+                throw new NotInLocalGameListException(gameName);
             }
             return gameInstallDirs[gameName];
         }

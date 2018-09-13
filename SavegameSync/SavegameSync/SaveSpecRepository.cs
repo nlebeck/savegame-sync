@@ -29,7 +29,10 @@ namespace SavegameSync
             {
                 return saveSpecs[gameName];
             }
-            return null;
+            else
+            {
+                throw new SaveSpecMissingException(gameName);
+            }
         }
 
         public ICollection<SaveSpec> GetAllSaveSpecs()

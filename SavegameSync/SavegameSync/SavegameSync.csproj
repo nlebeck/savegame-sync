@@ -99,8 +99,12 @@
     <Compile Include="ConfirmationDialog.xaml.cs">
       <DependentUpon>ConfirmationDialog.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Exceptions.cs" />
     <Compile Include="FileUtils.cs" />
     <Compile Include="GoogleDriveWrapper.cs" />
+    <Compile Include="InformationDialog.xaml.cs">
+      <DependentUpon>InformationDialog.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LocalGameList.cs" />
     <Compile Include="RepairFilesWindow.xaml.cs">
       <DependentUpon>RepairFilesWindow.xaml</DependentUpon>
@@ -122,6 +126,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="ConfirmationDialog.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="InformationDialog.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
