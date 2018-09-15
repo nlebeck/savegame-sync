@@ -71,7 +71,19 @@ namespace SavegameSync
         private async Task UpdateOrphanedSaveList()
         {
             orphanedSaveListBox.Items.Clear();
-            List<string> orphanedSaveFileNames = await savegameSync.GetOrphanedSaveFileNames();
+
+            List<string> orphanedSaveFileNames;
+            try
+            {
+                orphanedSaveFileNames = await savegameSync.GetOrphanedSaveFileNames();
+            }
+            catch (SavegameSyncException e)
+            {
+                orphanedSaveListBox.Items.Add("Error reading list:");
+                orphanedSaveListBox.Items.Add(e.Message);
+                return;
+            }
+
             foreach (string name in orphanedSaveFileNames)
             {
                 orphanedSaveListBox.Items.Add(name);
@@ -85,7 +97,19 @@ namespace SavegameSync
         private async Task UpdateMissingEntriesListAsync()
         {
             missingEntriesListBox.Items.Clear();
-            Dictionary<string, List<SavegameEntry>> missingEntries = await savegameSync.GetMissingSaveEntriesAsync();
+
+            Dictionary<string, List<SavegameEntry>> missingEntries;
+            try
+            {
+                missingEntries = await savegameSync.GetMissingSaveEntriesAsync();
+            }
+            catch (SavegameSyncException e)
+            {
+                missingEntriesListBox.Items.Add("Error reading list:");
+                missingEntriesListBox.Items.Add(e.Message);
+                return;
+            }
+
             foreach (string gameName in missingEntries.Keys)
             {
                 foreach (SavegameEntry save in missingEntries[gameName])
@@ -113,7 +137,10 @@ namespace SavegameSync
             }
 
             StartOperation();
-            await savegameSync.DeleteOrphanedSaveFile(saveFileName);
+            await SavegameSyncUtils.RunWithChecks(async () =>
+            {
+                await savegameSync.DeleteOrphanedSaveFile(saveFileName);
+            });
             await UpdateOrphanedSaveList();
             FinishOperation();
         }
@@ -145,7 +172,10 @@ namespace SavegameSync
             if (result.HasValue && result.GetValueOrDefault())
             {
                 StartOperation();
-                await savegameSync.DownloadOrphanedSaveFile(saveFileName);
+                await SavegameSyncUtils.RunWithChecks(async () =>
+                {
+                    await savegameSync.DownloadOrphanedSaveFile(saveFileName);
+                });
                 FinishOperation();
             }
         }
@@ -153,7 +183,10 @@ namespace SavegameSync
         private async void deleteMissingEntriesButton_Click(object sender, RoutedEventArgs e)
         {
             StartOperation();
-            await savegameSync.DeleteMissingSaveEntriesAsync();
+            await SavegameSyncUtils.RunWithChecks(async () =>
+            {
+                await savegameSync.DeleteMissingSaveEntriesAsync();
+            });
             await UpdateMissingEntriesListAsync();
             FinishOperation();
         }
@@ -171,8 +204,11 @@ namespace SavegameSync
             if (result.HasValue && result.Value)
             {
                 StartOperation();
-                Directory.CreateDirectory(directoryName);
-                await savegameSync.DownloadAllFilesToDirectoryAsync(directoryName);
+                await SavegameSyncUtils.RunWithChecks(async () =>
+                {
+                    Directory.CreateDirectory(directoryName);
+                    await savegameSync.DownloadAllFilesToDirectoryAsync(directoryName);
+                });
                 FinishOperation();
             }
         }
@@ -196,7 +232,10 @@ namespace SavegameSync
             }
 
             StartOperation();
-            await savegameSync.DeleteAllFilesAsync();
+            await SavegameSyncUtils.RunWithChecks(async () =>
+            {
+                await savegameSync.DeleteAllFilesAsync();
+            });
             await UpdateOrphanedSaveList();
             await UpdateMissingEntriesListAsync();
             FinishOperation();

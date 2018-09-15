@@ -64,7 +64,18 @@ namespace SavegameSync
         private async Task UpdateCloudGameList()
         {
             cloudGameListBox.Items.Clear();
-            List<string> cloudGameNames = await savegameSync.GetCloudGameNames();
+            List<string> cloudGameNames;
+
+            try
+            {
+                cloudGameNames = await savegameSync.GetCloudGameNames();
+            }
+            catch (SavegameSyncException e)
+            {
+                cloudGameListBox.Items.Add("Error reading cloud game list:");
+                cloudGameListBox.Items.Add(e.Message);
+                return;
+            }
 
             if (cloudGameNames == null)
             {
@@ -101,7 +112,10 @@ namespace SavegameSync
             if (result.HasValue && result.GetValueOrDefault())
             {
                 StartOperation();
-                await savegameSync.DeleteGameFromCloud(gameName);
+                await SavegameSyncUtils.RunWithChecks(async () =>
+                {
+                    await savegameSync.DeleteGameFromCloud(gameName);
+                });
                 await UpdateCloudGameList();
                 await savegameListControl.SetGameAndUpdateAsync(null);
                 FinishOperation();
@@ -124,7 +138,10 @@ namespace SavegameSync
             }
 
             StartOperation();
-            await savegameSync.DeleteSave(gameName, saveIndex);
+            await SavegameSyncUtils.RunWithChecks(async () =>
+            {
+                await savegameSync.DeleteSave(gameName, saveIndex);
+            });
             await savegameListControl.SetGameAndUpdateAsync(gameName);
             FinishOperation();
         }
@@ -167,7 +184,10 @@ namespace SavegameSync
             if (result.HasValue && result.GetValueOrDefault())
             {
                 StartOperation();
-                await savegameSync.DownloadSpecificSaveFileAsync(gameName, saveIndex);
+                await SavegameSyncUtils.RunWithChecks(async () =>
+                {
+                    await savegameSync.DownloadSpecificSaveFileAsync(gameName, saveIndex);
+                });
                 FinishOperation();
             }
         }

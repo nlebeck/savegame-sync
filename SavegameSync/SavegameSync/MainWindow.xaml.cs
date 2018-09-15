@@ -42,28 +42,6 @@ namespace SavegameSync
             FinishOperation();
         }
 
-        private delegate Task Operation();
-
-        private async Task RunWithChecks(Operation op)
-        {
-            try
-            {
-                await op();
-            }
-            catch (SavegameSyncException se)
-            {
-                string dialogText = "Error encountered while performing operation: " + se.Message;
-                InformationDialog dialog = new InformationDialog(dialogText);
-                dialog.ShowDialog();
-            }
-            catch (Exception e)
-            {
-                string dialogText = $"Exception of type {e.GetType()} thrown: {e.Message}";
-                InformationDialog dialog = new InformationDialog(dialogText);
-                dialog.ShowDialog();
-            }
-        }
-
         private void UpdateLocalGameList()
         {
             localGameListBox.Items.Clear();
@@ -166,7 +144,7 @@ namespace SavegameSync
             }
             string gameName = selectedGame.ToString();
             StartOperation("Uploading save for " + gameName + "...");
-            await RunWithChecks(async () =>
+            await SavegameSyncUtils.RunWithChecks(async () =>
             {
                 await savegameSync.ZipAndUploadSave(gameName);
             });
@@ -220,7 +198,7 @@ namespace SavegameSync
             }
 
             StartOperation("Downloading save for " + gameName + "...");
-            await RunWithChecks(async () =>
+            await SavegameSyncUtils.RunWithChecks(async () =>
             {
                 await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
             });
@@ -244,7 +222,7 @@ namespace SavegameSync
             }
 
             StartOperation("Deleting cloud save for " + gameName + "...");
-            await RunWithChecks(async () =>
+            await SavegameSyncUtils.RunWithChecks(async () =>
             {
                 await savegameSync.DeleteSave(gameName, saveIndex);
             });
@@ -290,7 +268,7 @@ namespace SavegameSync
             if (result.HasValue && result.GetValueOrDefault())
             {
                 StartOperation("Deleting game from local game list...");
-                await RunWithChecks(async () =>
+                await SavegameSyncUtils.RunWithChecks(async () =>
                 {
                     await savegameSync.DeleteLocalGame(gameName);
                 });

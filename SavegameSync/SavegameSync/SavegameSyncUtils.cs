@@ -8,6 +8,23 @@ namespace SavegameSync
 {
     public static class SavegameSyncUtils
     {
+
+        public delegate Task Operation();
+
+        public static async Task RunWithChecks(Operation op)
+        {
+            try
+            {
+                await op();
+            }
+            catch (SavegameSyncException se)
+            {
+                string dialogText = "Error encountered while performing operation: " + se.Message;
+                InformationDialog dialog = new InformationDialog(dialogText);
+                dialog.ShowDialog();
+            }
+        }
+
         public static string SerializeDateTime(DateTime dateTime)
         {
             return dateTime.Ticks.ToString();
