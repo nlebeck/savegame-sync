@@ -44,9 +44,8 @@ namespace SavegameSync
 
         private delegate Task Operation();
 
-        private async Task PerformOperationChecked(string message, Operation op)
+        private async Task RunWithChecks(Operation op)
         {
-            StartOperation(message);
             try
             {
                 await op();
@@ -63,7 +62,6 @@ namespace SavegameSync
                 InformationDialog dialog = new InformationDialog(dialogText);
                 dialog.ShowDialog();
             }
-            FinishOperation();
         }
 
         private void UpdateLocalGameList()
@@ -167,11 +165,13 @@ namespace SavegameSync
                 return;
             }
             string gameName = selectedGame.ToString();
-            await PerformOperationChecked("Uploading save for " + gameName + "...", async () =>
+            StartOperation("Uploading save for " + gameName + "...");
+            await RunWithChecks(async () =>
             {
                 await savegameSync.ZipAndUploadSave(gameName);
-                await savegameListControl.SetGameAndUpdateAsync(gameName);
             });
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
+            FinishOperation();
         }
 
         private void StartOperation(string message)
@@ -219,11 +219,13 @@ namespace SavegameSync
                 return;
             }
 
-            await PerformOperationChecked("Downloading save for " + gameName + "...", async () =>
+            StartOperation("Downloading save for " + gameName + "...");
+            await RunWithChecks(async () =>
             {
                 await savegameSync.DownloadAndUnzipSave(gameName, saveIndex);
-                UpdateLocalGameInfoDisplays(gameName);
             });
+            UpdateLocalGameInfoDisplays(gameName);
+            FinishOperation();
         }
 
         private async void deleteCloudSaveButton_Click(object sender, RoutedEventArgs e)
@@ -241,11 +243,13 @@ namespace SavegameSync
                 return;
             }
 
-            await PerformOperationChecked("Deleting cloud save for " + gameName + "...", async () =>
+            StartOperation("Deleting cloud save for " + gameName + "...");
+            await RunWithChecks(async () =>
             {
                 await savegameSync.DeleteSave(gameName, saveIndex);
-                await savegameListControl.SetGameAndUpdateAsync(gameName);
             });
+            await savegameListControl.SetGameAndUpdateAsync(gameName);
+            FinishOperation();
         }
 
         private async void debugButton_Click(object sender, RoutedEventArgs e)
@@ -285,13 +289,15 @@ namespace SavegameSync
             bool? result = dialog.ShowDialog();
             if (result.HasValue && result.GetValueOrDefault())
             {
-                await PerformOperationChecked("Deleting game from local game list...", async () =>
+                StartOperation("Deleting game from local game list...");
+                await RunWithChecks(async () =>
                 {
                     await savegameSync.DeleteLocalGame(gameName);
-                    UpdateLocalGameList();
-                    await savegameListControl.SetGameAndUpdateAsync(null);
-                    UpdateLocalGameInfoDisplays(null);
                 });
+                UpdateLocalGameList();
+                await savegameListControl.SetGameAndUpdateAsync(null);
+                UpdateLocalGameInfoDisplays(null);
+                FinishOperation();
             }
         }
 
