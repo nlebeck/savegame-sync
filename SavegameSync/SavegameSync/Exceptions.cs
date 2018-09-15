@@ -32,6 +32,18 @@ namespace SavegameSync
         }
     }
 
+    public class SaveSpecRepositoryMissingException : SavegameSyncException
+    {
+        public SaveSpecRepositoryMissingException()
+            : base("SaveSpecRepository.xml file is missing.") { }
+    }
+
+    public class SaveSpecRepositoryParseException : SavegameSyncException
+    {
+        public SaveSpecRepositoryParseException()
+            : base("SaveSpecRepository.xml file could not be parsed.") { }
+    }
+
     public class NotInLocalGameListException : SavegameSyncException
     {
         public NotInLocalGameListException(string gameName)

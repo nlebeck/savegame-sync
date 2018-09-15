@@ -130,6 +130,14 @@ namespace SavegameSync
             {
                 timestampMessage = "Error: save spec not found";
             }
+            catch (SaveSpecRepositoryMissingException)
+            {
+                timestampMessage = "Error: save spec repository file not found";
+            }
+            catch (SaveSpecRepositoryParseException)
+            {
+                timestampMessage = "Error: save spec repository file could not be parsed";
+            }
 
             localSaveTimestampTextBlock.Text = timestampMessage;
             installDirTextBlock.Text = installDir;
