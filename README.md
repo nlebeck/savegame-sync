@@ -112,48 +112,36 @@ client secret.
 ## Future work
 
 These are some things that could be done to make this app more robust and
-polished, arranged roughly in order of hardest to easiest:
+polished:
 
-1. Error handling: right now, this app is not very robust to errors, whether
-they're caused by Google Drive request failures, unexpected states in the local
-filesystem, or corrupted metadata files. Broadly speaking, I think the risk of
-losing data stored in the cloud is very low -- even if the master savegame-list
-file gets corrupted, the Orphaned Save window can be used to recover the files.
-However, many errors will currently result in unhandled exceptions that crash
-the app, so I'd like to have a more pleasant user experience that avoids making
-the user restart the app and tells the user 1) why an error happened, and 2)
-how the error affected the user's data (if at all).
+1. Right now, this app's error handling is incomplete. The classes for the
+three different windows have top-level exception-catching code that displays an
+error dialogue box for most of their operations (with the exception of
+initialization/login), but that exception-catching code only catches custom
+SavegameSyncExceptions defined by me, since I want to make sure I understand
+what's failing if I'm going to let the app continue to run after an error. I've
+defined SavegameSyncExceptions for some error cases related to the states of
+local files, but I haven't defined SavegameSyncExceptions for all of the
+possible failure conditions yet. In particular, I haven't defined
+SavegameSyncExceptions for failures caused by either Google Drive connection
+errors or unexpected states of the files in Google Drive. As a result, those
+failures will generally cause the app to crash with an unhandled exception.
 
-2. Currently, the app assumes users will only use it on one computer at a time.
-Bad things could happen if a user opens two instances of the app and
-simultaneously uploads and/or deletes cloud saves in both instances, since the
-savegame-list is not read and written transactionally. I think the worst that
-could happen is that a newly uploaded save could end up orphaned, or a save
-that was deleted might end up remaining in the savegame-list. The solution
-would be to add some sort of lock that is set when starting an operation and
-released when finishing the operation. Of course, then there are problems that
-could arise if one instance of the app grabs the lock but then fails to release
-the lock due to a crash/premature exit/Google Drive connection failure, so
-there would need to be some sort of timeout/abort mechanism.
+2. There should be some documentation in this README about the format of the
+`SaveSpecRepository.xml` file used to populate the SaveSpecRepository.
 
-3. Currently, adding SaveSpecs requires modifying the `SaveSpecRepository.cs`
-source file and recompiling the app. I want to change the SaveSpecRepository to
-read SaveSpecs from an XML or JSON file (or multiple files) that could be
-modified independently by users. I should also add documentation on how to
-define custom SaveSpecs to this README.
-
-4. Right now, all timestamps show up in UTC. This is probably confusing for
+3. Right now, all timestamps show up in UTC. This is probably confusing for
 users, so it would be good to have the timestamps show up in the user's current
 time zone (or let the user set the time zone).
 
-5. Currently, when you use the app to manually download files from the cloud
+4. Currently, when you use the app to manually download files from the cloud
 instead of synchronizing with a specific locally installed game (e.g., from the
 cloud game list window or the repair files window), the app just dumps the
 downloaded files in the directory from which the app was launched. It would be
 good to give the user a file picker and let the user choose where to put
 downloaded files.
 
-6. I've mostly just tested this app with one real game (Medal of Honor: Allied
+5. I've mostly just tested this app with one real game (Medal of Honor: Allied
 Assault) and various forms of hand-crafted dummy data. It would be good to test
 this app with a variety of different games, to make sure the SaveSpec format is
 flexible enough to handle different save file layouts.
@@ -180,6 +168,18 @@ duplicate saves by taking a hash of the zipped save directory or something, but
 then we would need to decide what policy to follow when a duplicate is
 detected. (Do we prevent the user from uploading a duplicate save? Or just
 display a warning message?)
+
+4. Currently, the app assumes users will only use it on one computer at a time.
+Bad things could happen if a user opens two instances of the app and
+simultaneously uploads and/or deletes cloud saves in both instances, since the
+savegame-list is not read and written transactionally. I think the worst that
+could happen is that a newly uploaded save could end up orphaned, or a save
+that was deleted might end up remaining in the savegame-list. The solution
+would be to add some sort of lock that is set when starting an operation and
+released when finishing the operation. Of course, then there are problems that
+could arise if one instance of the app grabs the lock but then fails to release
+the lock due to a crash/premature exit/Google Drive connection failure, so
+there would need to be some sort of timeout/abort mechanism.
 
 ## OneDrive bugs
 
