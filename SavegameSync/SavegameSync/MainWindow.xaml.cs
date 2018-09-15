@@ -122,21 +122,9 @@ namespace SavegameSync
                     timestampMessage = timestamp.ToString();
                 }
             }
-            catch (NotInLocalGameListException)
+            catch (SavegameSyncException e)
             {
-                timestampMessage = "Error: game not in local game list";
-            }
-            catch (SaveSpecMissingException)
-            {
-                timestampMessage = "Error: save spec not found";
-            }
-            catch (SaveSpecRepositoryMissingException)
-            {
-                timestampMessage = "Error: save spec repository file not found";
-            }
-            catch (SaveSpecRepositoryParseException)
-            {
-                timestampMessage = "Error: save spec repository file could not be parsed";
+                timestampMessage = "Error: " + e.Message;
             }
 
             localSaveTimestampTextBlock.Text = timestampMessage;
