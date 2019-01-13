@@ -4,4 +4,14 @@
     <name>Medal of Honor Allied Assault War Chest</name>
     <path>main\save</path>
   </saveSpec>
+  <saveSpec>
+    <!--
+        Diablo II stores save files separately from the main install, so you
+        should select the local directory holding the save files (e.g.,
+        C:\Users\<username>\Saved Games\Diablo II) as the game's "local install
+        directory."
+    -->
+    <name>Diablo II</name>
+    <path>.</path>
+  </saveSpec>
 </saveSpecRepository>
