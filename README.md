@@ -14,9 +14,7 @@ supports storing multiple cloud saves for each game, and lets the user choose
 which cloud save to download.
 
 2. SavegameSync can be extended to support any game by defining a custom
-"SaveSpec" for that game. Currently, adding a SaveSpec for a new game requires
-modifying a source file and recompiling the app, but it shouldn't be too hard
-to modify the app to support loading SaveSpecs from XML or JSON files.
+XML "SaveSpec" for that game.
 
 Originally, I intended this app to be used for GOG games, but since I started
 working on it, GOG implemented its own cloud save feature. There are still some
@@ -141,10 +139,21 @@ downloaded files in the directory from which the app was launched. It would be
 good to give the user a file picker and let the user choose where to put
 downloaded files.
 
-5. I've mostly just tested this app with one real game (Medal of Honor: Allied
-Assault) and various forms of hand-crafted dummy data. It would be good to test
-this app with a variety of different games, to make sure the SaveSpec format is
-flexible enough to handle different save file layouts.
+5. I've mostly just tested this app with two real games (Medal of Honor: Allied
+Assault and Diablo II) and various forms of hand-crafted dummy data. It would
+be good to test this app with a variety of different games, to make sure the
+SaveSpec format is flexible enough to handle different save file layouts.
+
+6. The dialog for adding a local game should have some text with instructions
+and information about the choices that it is asking the user to make.
+
+7. Some games store save files in a separate directory from the main game
+installation (e.g., a subdirectory of `C:\Users\<username>\Saved Games`). That
+directory is the one that we want users to select when adding a local game.
+There should be a field in the SaveSpec that provides information about which
+directory should be selected as the game's "install directory," and there
+should be instructions when adding a local game that convey that information to
+the user.
 
 ## Limitations
 
