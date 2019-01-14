@@ -103,9 +103,12 @@ client ID" option.
 then click the "Download JSON" button to download a JSON file containing the
 client secret.
 
-4. Copy that JSON file into the SavegameSync project folder
-(`SavegameSync\SavegameSync` from the repo root) and rename it
-`google-drive-client-secret.json`.
+4. Rename the downloaded JSON file `google-drive-client-secret.json`.
+
+5. If you're running a binary release of SavegameSync, copy the JSON file into
+the directory holding `SavegameSync.exe`. If you're building SavegameSync from
+source, copy the JSON file into the SavegameSync project folder
+(`SavegameSync\SavegameSync` from the repo root).
 
 ## Future work
 
