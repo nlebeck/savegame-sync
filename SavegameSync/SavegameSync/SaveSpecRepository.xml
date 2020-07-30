@@ -14,4 +14,19 @@
     <name>Diablo II</name>
     <path>.</path>
   </saveSpec>
+  <saveSpec>
+    <name>Call of Duty</name>
+    <path>Main\save</path>
+  </saveSpec>
+  <saveSpec>
+    <!--
+        Crysis store save files separately from the main install, so you
+        should select the root directory holding its configuration data (e.g.,
+        C:\Users\<username>\Documents\My Games\Crysis) as the game's "local
+        install directory."
+    -->
+    <name>Crysis</name>
+    <path>Profiles</path>
+    <path>SaveGames</path>
+  </saveSpec>
 </saveSpecRepository>
