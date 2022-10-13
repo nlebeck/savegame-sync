@@ -43,4 +43,14 @@
     <name>Warcraft III Reforged</name>
     <path>BattleNet</path>
   </saveSpec>
+  <saveSpec>
+    <!--
+        Kingdom Hearts stores save files separately from the main install, so
+        you should select the local directory holding the save files (e.g.,
+        C:\Users\<username>\Documents\KINGDOM HEARTS HD 1.5+2.5 ReMIX) as the
+        game's "local install directory."
+    -->
+    <name>Kingdom Hearts HD 1.5+2.5 ReMIX</name>
+    <path>.</path>
+  </saveSpec>
 </saveSpecRepository>
