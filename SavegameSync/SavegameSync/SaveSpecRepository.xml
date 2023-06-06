@@ -53,4 +53,8 @@
     <name>Kingdom Hearts HD 1.5+2.5 ReMIX</name>
     <path>.</path>
   </saveSpec>
+  <saveSpec>
+    <name>Fallout Classic</name>
+    <path>DATA\SAVEGAME</path>
+  </saveSpec>
 </saveSpecRepository>
